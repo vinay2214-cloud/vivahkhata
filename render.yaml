@@ -1,0 +1,27 @@
+# Render Blueprint for Vivah Khata — one free Web Service (app + AI server).
+services:
+  - type: web
+    name: vivahkhata
+    runtime: node
+    plan: free
+    region: singapore          # closest Render region to India
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash
+      - key: VITE_FIREBASE_PROJECT_ID
+        value: vivahkatha-f164e
+      # You type these three in the Render dashboard (they are NOT stored in GitHub):
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: VITE_FIREBASE_API_KEY
+        sync: false
+      - key: VITE_FIREBASE_APP_ID
+        sync: false

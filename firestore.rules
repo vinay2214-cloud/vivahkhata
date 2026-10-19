@@ -1,0 +1,215 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ---------- helpers ----------
+    function signedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+
+    function isOwnerDoc(wid) {
+      return signedIn()
+             && exists(/databases/$(database)/documents/weddings/$(wid))
+             && get(/databases/$(database)/documents/weddings/$(wid)).data.ownerId == uid();
+    }
+
+    function isOwnerWrite(wid) {
+      return signedIn() && (
+        isOwnerDoc(wid)
+        || (existsAfter(/databases/$(database)/documents/weddings/$(wid))
+            && getAfter(/databases/$(database)/documents/weddings/$(wid)).data.ownerId == uid())
+      );
+    }
+
+    function memberPath(wid) {
+      return /databases/$(database)/documents/weddings/$(wid)/members/$(uid());
+    }
+
+    function isMember(wid) {
+      return signedIn() && (
+        isOwnerDoc(wid)
+        || (exists(memberPath(wid)) && get(memberPath(wid)).data.removed != true)
+      );
+    }
+
+    function myRole(wid) {
+      return isOwnerDoc(wid)
+        ? 'owner'
+        : (exists(memberPath(wid)) ? get(memberPath(wid)).data.role : null);
+    }
+
+    function hasRole(wid, roles) {
+      return isMember(wid) && (isOwnerDoc(wid) || myRole(wid) in roles);
+    }
+
+    function weddingActive(wid) {
+      return (exists(/databases/$(database)/documents/weddings/$(wid))
+             && get(/databases/$(database)/documents/weddings/$(wid)).data.status == 'active')
+          || (existsAfter(/databases/$(database)/documents/weddings/$(wid))
+             && getAfter(/databases/$(database)/documents/weddings/$(wid)).data.status == 'active');
+    }
+
+    function auditOnCreate() {
+      return request.resource.data.createdBy == uid()
+          && request.resource.data.deleted == false;
+    }
+
+    function auditOnUpdate() {
+      return request.resource.data.updatedBy == uid()
+          && request.resource.data.createdBy == resource.data.createdBy;
+    }
+
+    function validMoney(v) { return v is int && v >= 0 && v <= 10000000000; }
+
+    function validInvite(wid, m) {
+      let inv = get(/databases/$(database)/documents/invites/$(m.inviteCode)).data;
+      return inv.weddingId == wid
+          && inv.revoked == false
+          && inv.expiresAt > request.time
+          && m.role == inv.role
+          && m.side == inv.side
+          && m.removed == false;
+    }
+
+    // ---------- users ----------
+    match /users/{userId} {
+      allow read, write: if signedIn() && uid() == userId;
+    }
+
+    // ---------- invites ----------
+    match /invites/{code} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if (isOwnerWrite(request.resource.data.weddingId) || hasRole(request.resource.data.weddingId, ['owner']))
+                    && request.resource.data.role in ['editor','contributor','giftDesk','viewer']
+                    && request.resource.data.code == code;
+      allow update: if (isOwnerWrite(resource.data.weddingId) || hasRole(resource.data.weddingId, ['owner']))
+                    && request.resource.data.weddingId == resource.data.weddingId;
+      allow delete: if false;
+    }
+
+    // ---------- weddings ----------
+    match /weddings/{wid} {
+      allow read: if isMember(wid);
+      allow create: if signedIn() && request.resource.data.ownerId == uid()
+                    && request.resource.data.status == 'active';
+      allow update: if isOwnerWrite(wid) || hasRole(wid, ['owner'])
+                    || (hasRole(wid, ['editor'])
+                        && !request.resource.data.diff(resource.data).affectedKeys()
+                             .hasAny(['ownerId','status','plan']));
+      allow delete: if isOwnerWrite(wid) || hasRole(wid, ['owner']);
+
+      // ----- members -----
+      match /members/{memberId} {
+        allow read: if isMember(wid);
+
+        allow create: if signedIn() && memberId == uid()
+          && (
+               ( request.resource.data.role == 'owner' && isOwnerWrite(wid) )
+            || ( 'inviteCode' in request.resource.data && validInvite(wid, request.resource.data) )
+          );
+
+        allow update: if isOwnerWrite(wid) || hasRole(wid, ['owner'])
+          || (memberId == uid()
+              && request.resource.data.diff(resource.data).affectedKeys()
+                   .hasOnly(['displayName','photoURL']));
+        allow delete: if false;
+      }
+
+      // ----- events -----
+      match /events/{id} {
+        allow read: if isMember(wid);
+        allow create: if (isOwnerWrite(wid) || hasRole(wid, ['owner','editor'])) && auditOnCreate();
+        allow update: if (isOwnerWrite(wid) || hasRole(wid, ['owner','editor'])) && auditOnUpdate();
+        allow delete: if false;
+      }
+
+      // ----- expenses -----
+      match /expenses/{id} {
+        allow read: if isMember(wid);
+        allow create: if (isOwnerWrite(wid) || hasRole(wid, ['owner','editor','contributor']))
+                      && weddingActive(wid) && auditOnCreate()
+                      && validMoney(request.resource.data.amountPaise)
+                      && request.resource.data.amountPaise > 0;
+        allow update: if weddingActive(wid) && auditOnUpdate()
+                      && validMoney(request.resource.data.amountPaise)
+                      && ( isOwnerWrite(wid) || hasRole(wid, ['owner','editor'])
+                           || (hasRole(wid, ['contributor']) && resource.data.createdBy == uid()) );
+        allow delete: if false;
+      }
+
+      // ----- vendors -----
+      match /vendors/{id} {
+        allow read: if isMember(wid);
+        allow create: if (isOwnerWrite(wid) || hasRole(wid, ['owner','editor'])) && auditOnCreate();
+        allow update: if (isOwnerWrite(wid) || hasRole(wid, ['owner','editor'])) && auditOnUpdate();
+        allow delete: if false;
+      }
+
+      // ----- gifts -----
+      match /gifts/{id} {
+        allow read: if isMember(wid)
+                    || (hasRole(wid, ['giftDesk']) && resource.data.createdBy == uid());
+        allow create: if (isOwnerWrite(wid) || hasRole(wid, ['owner','editor','contributor','giftDesk']))
+                      && auditOnCreate()
+                      && validMoney(request.resource.data.cashPaise)
+                      && request.resource.data.giverName is string
+                      && request.resource.data.giverName.size() > 0;
+        allow update: if auditOnUpdate() && validMoney(request.resource.data.cashPaise)
+                      && ( isOwnerWrite(wid) || hasRole(wid, ['owner','editor'])
+                           || (hasRole(wid, ['giftDesk','contributor'])
+                               && resource.data.createdBy == uid()
+                               && request.time < resource.data.createdAt + duration.value(15, 'm')) );
+        allow delete: if false;
+      }
+
+      // ----- guests, tasks, purchases -----
+      match /guests/{id} {
+        allow read: if isMember(wid);
+        allow create: if (isOwnerWrite(wid) || hasRole(wid, ['owner','editor'])) && auditOnCreate();
+        allow update: if (isOwnerWrite(wid) || hasRole(wid, ['owner','editor'])) && auditOnUpdate();
+        allow delete: if false;
+      }
+
+      match /tasks/{id} {
+        allow read: if isMember(wid);
+        allow create: if (isOwnerWrite(wid) || hasRole(wid, ['owner','editor'])) && auditOnCreate();
+        allow update: if auditOnUpdate()
+                      && ( isOwnerWrite(wid) || hasRole(wid, ['owner','editor'])
+                           || (isMember(wid) && resource.data.assigneeUid == uid()
+                               && request.resource.data.diff(resource.data).affectedKeys()
+                                    .hasOnly(['status','updatedBy','updatedAt'])) );
+        allow delete: if false;
+      }
+
+      match /purchases/{id} {
+        allow read: if isMember(wid);
+        allow create: if (isOwnerWrite(wid) || hasRole(wid, ['owner','editor','contributor'])) && auditOnCreate();
+        allow update: if auditOnUpdate()
+                      && ( isOwnerWrite(wid) || hasRole(wid, ['owner','editor'])
+                           || resource.data.createdBy == uid() );
+        allow delete: if false;
+      }
+
+      // ----- documents & attachments -----
+      match /documents/{id} {
+        allow read: if isOwnerDoc(wid) || hasRole(wid, ['owner','editor']);
+        allow create: if (isOwnerWrite(wid) || hasRole(wid, ['owner','editor'])) && auditOnCreate();
+        allow update: if (isOwnerWrite(wid) || hasRole(wid, ['owner','editor'])) && auditOnUpdate();
+        allow delete: if isOwnerWrite(wid) || hasRole(wid, ['owner']);
+      }
+
+      match /attachments/{id} {
+        allow read: if isMember(wid);
+        allow create: if (isOwnerWrite(wid) || hasRole(wid, ['owner','editor','contributor'])) && auditOnCreate()
+                      && request.resource.data.dataBase64.size() < 750000;
+        allow update: if false;
+        allow delete: if isOwnerWrite(wid) || hasRole(wid, ['owner','editor']);
+      }
+    }
+  }
+}

@@ -1,0 +1,332 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile document",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 20 },
+        "language": { "type": "string", "enum": ["en", "te"] },
+        "photoURL": { "type": "string", "maxLength": 500 },
+        "weddingIds": { "type": "array" },
+        "lastWeddingId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["displayName", "language"]
+    },
+    "Invite": {
+      "title": "Invite",
+      "description": "Shareable invite code to join a wedding",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string", "maxLength": 16 },
+        "weddingId": { "type": "string", "maxLength": 128 },
+        "weddingTitle": { "type": "string", "maxLength": 200 },
+        "role": { "type": "string", "enum": ["editor", "contributor", "giftDesk", "viewer"] },
+        "side": { "type": "string", "enum": ["bride", "groom", "common"] },
+        "createdBy": { "type": "string", "maxLength": 128 },
+        "createdByName": { "type": "string", "maxLength": 100 },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "revoked": { "type": "boolean" }
+      },
+      "required": ["code", "weddingId", "role", "side", "createdBy", "expiresAt", "revoked"]
+    },
+    "Wedding": {
+      "title": "Wedding",
+      "description": "Wedding workspace root ledger",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 200 },
+        "brideName": { "type": "string", "maxLength": 100 },
+        "groomName": { "type": "string", "maxLength": 100 },
+        "weddingDate": { "type": "string", "maxLength": 20 },
+        "city": { "type": "string", "maxLength": 100 },
+        "ownerId": { "type": "string", "maxLength": 128 },
+        "sides": { "type": "object" },
+        "totalBudgetPaise": { "type": "number" },
+        "categoryBudgets": { "type": "object" },
+        "categories": { "type": "array" },
+        "status": { "type": "string", "enum": ["active", "archived"] },
+        "plan": { "type": "string", "enum": ["free", "premium"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "ownerId", "status"]
+    },
+    "Member": {
+      "title": "Member",
+      "description": "Family member belonging to a wedding with assigned role and side",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "photoURL": { "type": "string", "maxLength": 500 },
+        "role": { "type": "string", "enum": ["owner", "editor", "contributor", "giftDesk", "viewer"] },
+        "side": { "type": "string", "enum": ["bride", "groom", "common"] },
+        "inviteCode": { "type": "string", "maxLength": 16 },
+        "removed": { "type": "boolean" },
+        "joinedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName", "role", "side", "removed"]
+    },
+    "Event": {
+      "title": "Event",
+      "description": "Wedding ritual or ceremony event",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["engagement", "haldi", "mehendi", "sangeet", "wedding", "reception", "vratham", "other"] },
+        "name": { "type": "string", "maxLength": 100 },
+        "date": { "type": "string", "maxLength": 20 },
+        "startTime": { "type": "string", "maxLength": 10 },
+        "venue": { "type": "string", "maxLength": 200 },
+        "mapUrl": { "type": "string", "maxLength": 500 },
+        "side": { "type": "string", "enum": ["bride", "groom", "common"] },
+        "budgetPaise": { "type": "number" },
+        "notes": { "type": "string", "maxLength": 500 },
+        "order": { "type": "number" },
+        "createdBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedBy": { "type": "string", "maxLength": 128 },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "deleted": { "type": "boolean" }
+      },
+      "required": ["name", "createdBy", "deleted"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "Expense transaction logged in integer paise",
+      "type": "object",
+      "properties": {
+        "amountPaise": { "type": "number" },
+        "categoryId": { "type": "string", "maxLength": 64 },
+        "eventId": { "type": "string", "maxLength": 128 },
+        "vendorId": { "type": "string", "maxLength": 128 },
+        "scheduleItemId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "paidByUid": { "type": "string", "maxLength": 128 },
+        "paidByName": { "type": "string", "maxLength": 100 },
+        "mode": { "type": "string", "enum": ["cash", "upi", "card", "bank", "cheque"] },
+        "type": { "type": "string", "enum": ["full", "advance", "balance"] },
+        "date": { "type": "string", "maxLength": 20 },
+        "side": { "type": "string", "enum": ["bride", "groom", "common"] },
+        "note": { "type": "string", "maxLength": 500 },
+        "upiRef": { "type": "string", "maxLength": 100 },
+        "attachmentIds": { "type": "array" },
+        "source": { "type": "string", "enum": ["manual", "voice", "receipt", "upi"] },
+        "createdBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedBy": { "type": "string", "maxLength": 128 },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "deleted": { "type": "boolean" }
+      },
+      "required": ["amountPaise", "categoryId", "paidByName", "mode", "date", "createdBy", "deleted"]
+    },
+    "Vendor": {
+      "title": "Vendor",
+      "description": "Wedding vendor and payment schedule tracker",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 150 },
+        "categoryId": { "type": "string", "maxLength": 64 },
+        "contactName": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 20 },
+        "quotedPaise": { "type": "number" },
+        "agreedPaise": { "type": "number" },
+        "schedule": { "type": "array" },
+        "notes": { "type": "string", "maxLength": 500 },
+        "archived": { "type": "boolean" },
+        "createdBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedBy": { "type": "string", "maxLength": 128 },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "deleted": { "type": "boolean" }
+      },
+      "required": ["name", "categoryId", "createdBy", "deleted"]
+    },
+    "Gift": {
+      "title": "Gift",
+      "description": "Chadivimpulu / Gift record received from guest",
+      "type": "object",
+      "properties": {
+        "envelopeNo": { "type": "number" },
+        "giverName": { "type": "string", "maxLength": 150 },
+        "relation": { "type": "string", "maxLength": 100 },
+        "town": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 20 },
+        "side": { "type": "string", "enum": ["bride", "groom", "common"] },
+        "eventId": { "type": "string", "maxLength": 128 },
+        "cashPaise": { "type": "number" },
+        "goldMg": { "type": "number" },
+        "goldDescription": { "type": "string", "maxLength": 200 },
+        "items": { "type": "string", "maxLength": 300 },
+        "receivedByUid": { "type": "string", "maxLength": 128 },
+        "note": { "type": "string", "maxLength": 500 },
+        "nameKey": { "type": "string", "maxLength": 150 },
+        "source": { "type": "string", "enum": ["manual", "voice", "giftDesk"] },
+        "createdBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedBy": { "type": "string", "maxLength": 128 },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "deleted": { "type": "boolean" }
+      },
+      "required": ["giverName", "cashPaise", "createdBy", "deleted"]
+    },
+    "Guest": {
+      "title": "Guest",
+      "description": "Guest family and RSVP status per event",
+      "type": "object",
+      "properties": {
+        "familyName": { "type": "string", "maxLength": 150 },
+        "contactName": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 20 },
+        "town": { "type": "string", "maxLength": 100 },
+        "side": { "type": "string", "enum": ["bride", "groom", "common"] },
+        "relation": { "type": "string", "maxLength": 100 },
+        "adults": { "type": "number" },
+        "kids": { "type": "number" },
+        "rsvp": { "type": "object" },
+        "needsStay": { "type": "boolean" },
+        "needsPickup": { "type": "boolean" },
+        "diet": { "type": "string", "enum": ["veg", "nonveg", "jain", "none"] },
+        "returnGiftGiven": { "type": "boolean" },
+        "nameKey": { "type": "string", "maxLength": 150 },
+        "createdBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedBy": { "type": "string", "maxLength": 128 },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "deleted": { "type": "boolean" }
+      },
+      "required": ["familyName", "createdBy", "deleted"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Task item assigned to a member for an event",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 200 },
+        "eventId": { "type": "string", "maxLength": 128 },
+        "assigneeUid": { "type": "string", "maxLength": 128 },
+        "dueDate": { "type": "string", "maxLength": 20 },
+        "status": { "type": "string", "enum": ["todo", "doing", "done"] },
+        "priority": { "type": "string", "enum": ["low", "normal", "high"] },
+        "createdBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedBy": { "type": "string", "maxLength": 128 },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "deleted": { "type": "boolean" }
+      },
+      "required": ["title", "status", "createdBy", "deleted"]
+    },
+    "Purchase": {
+      "title": "Purchase",
+      "description": "Clothing, jewellery, and wedding items record",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 150 },
+        "category": { "type": "string", "enum": ["clothing", "jewellery", "gifts", "pooja", "other"] },
+        "forWhom": { "type": "string", "maxLength": 100 },
+        "quantity": { "type": "number" },
+        "goldMg": { "type": "number" },
+        "amountPaise": { "type": "number" },
+        "expenseId": { "type": "string", "maxLength": 128 },
+        "shop": { "type": "string", "maxLength": 150 },
+        "heldBy": { "type": "string", "maxLength": 100 },
+        "createdBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedBy": { "type": "string", "maxLength": 128 },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "deleted": { "type": "boolean" }
+      },
+      "required": ["name", "category", "createdBy", "deleted"]
+    },
+    "Document": {
+      "title": "Document",
+      "description": "Document vault entry for contracts, bills, or receipts",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 200 },
+        "tag": { "type": "string", "enum": ["receipt", "contract", "registration", "id", "invitation", "other"] },
+        "attachmentId": { "type": "string", "maxLength": 128 },
+        "mime": { "type": "string", "maxLength": 64 },
+        "sizeBytes": { "type": "number" },
+        "createdBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedBy": { "type": "string", "maxLength": 128 },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "deleted": { "type": "boolean" }
+      },
+      "required": ["title", "tag", "createdBy", "deleted"]
+    },
+    "Attachment": {
+      "title": "Attachment",
+      "description": "Compressed base64 image storage fallback",
+      "type": "object",
+      "properties": {
+        "parentType": { "type": "string", "enum": ["expense", "vendor", "purchase", "document"] },
+        "parentId": { "type": "string", "maxLength": 128 },
+        "mime": { "type": "string", "maxLength": 64 },
+        "dataBase64": { "type": "string", "maxLength": 750000 },
+        "width": { "type": "number" },
+        "height": { "type": "number" },
+        "createdBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["parentType", "parentId", "dataBase64", "createdBy"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile collection"
+    },
+    "/invites/{code}": {
+      "schema": "Invite",
+      "description": "Wedding shareable invite links"
+    },
+    "/weddings/{wid}": {
+      "schema": "Wedding",
+      "description": "Wedding root ledger documents"
+    },
+    "/weddings/{wid}/members/{uid}": {
+      "schema": "Member",
+      "description": "Members belonging to a wedding"
+    },
+    "/weddings/{wid}/events/{id}": {
+      "schema": "Event",
+      "description": "Ceremonies and events"
+    },
+    "/weddings/{wid}/expenses/{id}": {
+      "schema": "Expense",
+      "description": "Wedding expenses"
+    },
+    "/weddings/{wid}/vendors/{id}": {
+      "schema": "Vendor",
+      "description": "Vendors and payment schedules"
+    },
+    "/weddings/{wid}/gifts/{id}": {
+      "schema": "Gift",
+      "description": "Gifts received register"
+    },
+    "/weddings/{wid}/guests/{id}": {
+      "schema": "Guest",
+      "description": "Guests and RSVP"
+    },
+    "/weddings/{wid}/tasks/{id}": {
+      "schema": "Task",
+      "description": "Tasks checklist"
+    },
+    "/weddings/{wid}/purchases/{id}": {
+      "schema": "Purchase",
+      "description": "Purchases and jewellery"
+    },
+    "/weddings/{wid}/documents/{id}": {
+      "schema": "Document",
+      "description": "Documents vault"
+    },
+    "/weddings/{wid}/attachments/{id}": {
+      "schema": "Attachment",
+      "description": "Receipts and image attachments"
+    }
+  }
+}

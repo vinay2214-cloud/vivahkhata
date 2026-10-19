@@ -1,0 +1,67 @@
+import React from 'react';
+import { Check } from 'lucide-react';
+
+export interface ChipOption {
+  id: string;
+  label: string;
+  icon?: React.ReactNode;
+}
+
+export interface ChipGroupProps {
+  options: ChipOption[];
+  selectedId: string | string[];
+  onChange: (id: any) => void;
+  isMulti?: boolean;
+  className?: string;
+}
+
+export const ChipGroup: React.FC<ChipGroupProps> = ({
+  options,
+  selectedId,
+  onChange,
+  isMulti = false,
+  className = '',
+}) => {
+  const isSelected = (id: string) => {
+    if (isMulti && Array.isArray(selectedId)) {
+      return selectedId.includes(id);
+    }
+    return selectedId === id;
+  };
+
+  const handleClick = (id: string) => {
+    if (isMulti && Array.isArray(selectedId)) {
+      if (selectedId.includes(id)) {
+        onChange(selectedId.filter((item) => item !== id));
+      } else {
+        onChange([...selectedId, id]);
+      }
+    } else {
+      onChange(id);
+    }
+  };
+
+  return (
+    <div className={`flex items-center gap-2 overflow-x-auto no-scrollbar py-1 ${className}`}>
+      {options.map((opt) => {
+        const active = isSelected(opt.id);
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            onClick={() => handleClick(opt.id)}
+            className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-full transition-all shrink-0 cursor-pointer border select-none ${
+              active
+                ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)] border-[var(--color-primary)] font-semibold shadow-xs'
+                : 'bg-[var(--color-surface)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:bg-[var(--color-surface-2)]'
+            }`}
+          >
+            {opt.icon}
+            <span>{opt.label}</span>
+            {active && <Check className="w-3.5 h-3.5 stroke-[2.5]" />}
+          </button>
+        );
+      })}
+    </div>
+  );
+};

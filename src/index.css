@@ -1,0 +1,41 @@
+@import "tailwindcss";
+@import "./styles/tokens.css";
+
+@layer utilities {
+  .bg-app {
+    background-color: var(--color-bg);
+  }
+  .bg-surface {
+    background-color: var(--color-surface);
+  }
+  .bg-surface-2 {
+    background-color: var(--color-surface-2);
+  }
+  .bg-primary-soft {
+    background-color: var(--color-primary-soft);
+  }
+  .bg-accent-soft {
+    background-color: var(--color-accent-soft);
+  }
+  .text-primary-brand {
+    color: var(--color-primary);
+  }
+  .text-accent-brand {
+    color: var(--color-accent);
+  }
+  .text-success-brand {
+    color: var(--color-success);
+  }
+  .text-warning-brand {
+    color: var(--color-warning);
+  }
+  .text-danger-brand {
+    color: var(--color-danger);
+  }
+  .border-brand {
+    border-color: var(--color-border);
+  }
+  .text-muted-brand {
+    color: var(--color-text-muted);
+  }
+}
