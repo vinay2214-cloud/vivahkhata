@@ -78,7 +78,7 @@ flowchart LR
 
 ## Accessibility
 
-- Automated **axe-core** scan of the app: **0 WCAG 2 A/AA violations** in light and dark themes.
+- Automated **axe-core** scan of the sign-in screen: **0 WCAG 2 A/AA violations** in light and dark themes (signed-in screens are built with the same components and checked by hand).
 - Dialogs use `role="dialog"`, `aria-modal`, labelled titles, close on **Escape** and return focus to the button that opened them.
 - Save confirmations are announced to screen readers (`aria-live`); icon-only buttons have labels; the mic button exposes its pressed state.
 - Visible keyboard focus ring everywhere; animations are disabled for users who prefer reduced motion.

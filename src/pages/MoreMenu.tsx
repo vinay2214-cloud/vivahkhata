@@ -32,14 +32,15 @@ export const MoreMenu: React.FC<MoreMenuProps> = ({
   onOpenMembers,
 }) => {
   const { t, i18n } = useTranslation();
-  const { weddingId, wedding, events, showToast } = useWedding();
+  const { weddingId, wedding, events, expenses, vendors, gifts, showToast } = useWedding();
+  const alreadyHasData = expenses.length > 0 || vendors.length > 0 || gifts.length > 0;
   const { user } = useAuth();
   const [seeding, setSeeding] = useState(false);
 
   const currentLang = asAppLanguage(i18n.language);
 
   const handleSeedDemoData = async () => {
-    if (!weddingId || !user) return;
+    if (!weddingId || !user || seeding || alreadyHasData) return;
     setSeeding(true);
 
     try {
@@ -165,10 +166,11 @@ export const MoreMenu: React.FC<MoreMenuProps> = ({
           variant="outline"
           size="md"
           loading={seeding}
+          disabled={alreadyHasData}
           onClick={handleSeedDemoData}
           icon={<Sparkles className="w-4 h-4 text-[var(--color-accent)]" />}
         >
-          Load Wedding Demo Data (Catering, Decor, Gifts)
+          {alreadyHasData ? 'Sample data is already loaded' : 'Load Wedding Demo Data (Catering, Decor, Gifts)'}
         </Button>
       </div>
       )}

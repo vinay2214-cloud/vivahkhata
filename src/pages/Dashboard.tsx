@@ -46,7 +46,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const showSampleBanner = Boolean(user?.isAnonymous) && expenses.length === 0 && gifts.length === 0 && vendors.length === 0;
 
   const loadSample = async () => {
-    if (!weddingId || !user) return;
+    if (!weddingId || !user || loadingSample) return;
     setLoadingSample(true);
     try {
       await seedDemoWedding(weddingId, user.uid);
