@@ -9,7 +9,10 @@ export interface ThanksInput {
 const MAX_LENGTH = 600;
 
 /** Plain template used when the AI is off or offline. Never mentions the amount. */
-export function templateThanks({ giverName, hostNames }: ThanksInput, language: ThanksLanguage): string {
+export function templateThanks(
+  { giverName, hostNames }: ThanksInput,
+  language: ThanksLanguage
+): string {
   const name = giverName.trim();
   const sign = hostNames?.trim();
   if (language === 'te') {
@@ -24,7 +27,10 @@ export function templateThanks({ giverName, hostNames }: ThanksInput, language: 
 /** Tidies what Gemini returned: trims, caps the length and drops anything empty. */
 export function cleanThanks(raw: unknown): string | null {
   if (typeof raw !== 'string') return null;
-  const text = raw.replace(/\r/g, '').replace(/\n{3,}/g, '\n\n').trim();
+  const text = raw
+    .replace(/\r/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
   if (!text) return null;
   return text.length > MAX_LENGTH ? `${text.slice(0, MAX_LENGTH).trimEnd()}…` : text;
 }

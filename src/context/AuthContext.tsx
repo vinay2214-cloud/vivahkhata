@@ -1,3 +1,4 @@
+import { logger } from '../lib/logger';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   User as FirebaseUser,
@@ -58,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setProfile(initialProfile);
           }
         } catch (error) {
-          console.error('Error fetching user profile:', error);
+          logger.error('Error fetching user profile:', error);
         }
       } else {
         setProfile(null);
@@ -73,7 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
-      console.error('Sign in error:', error);
+      logger.error('Sign in error:', error);
       throw error;
     }
   };
@@ -95,7 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setProfile(demoProfile);
       switchLanguage('en');
     } catch (error) {
-      console.error('Demo sign in error:', error);
+      logger.error('Demo sign in error:', error);
       throw error;
     }
   };

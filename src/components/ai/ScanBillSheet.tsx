@@ -1,7 +1,7 @@
+import { logger } from '../../lib/logger';
 import React, { useState } from 'react';
 import { Camera, Image as ImageIcon, QrCode, Sparkles, AlertCircle } from 'lucide-react';
 import { BottomSheet } from '../ui/BottomSheet';
-import { Button } from '../ui/Button';
 import { useWedding } from '../../context/WeddingContext';
 import { useAuth } from '../../context/AuthContext';
 import { aiErrorMessage } from '../../lib/aiErrors';
@@ -13,11 +13,7 @@ interface ScanBillSheetProps {
   onParsed: (draft: ParsedAIDraft) => void;
 }
 
-export const ScanBillSheet: React.FC<ScanBillSheetProps> = ({
-  isOpen,
-  onClose,
-  onParsed,
-}) => {
+export const ScanBillSheet: React.FC<ScanBillSheetProps> = ({ isOpen, onClose, onParsed }) => {
   const { wedding, vendors, members, events } = useWedding();
   const { user, profile } = useAuth();
   const isDemo = !!user?.isAnonymous;
@@ -55,7 +51,7 @@ export const ScanBillSheet: React.FC<ScanBillSheetProps> = ({
       onClose();
       onParsed(draft);
     } catch (err) {
-      console.error('Bill reading failed', err);
+      logger.error('Bill reading failed', err);
       setError(aiErrorMessage(err));
     } finally {
       setLoading(false);
@@ -135,12 +131,8 @@ export const ScanBillSheet: React.FC<ScanBillSheetProps> = ({
         <div className="grid grid-cols-2 gap-3">
           <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[var(--color-border)] rounded-2xl hover:border-[var(--color-primary)] bg-[var(--color-surface)] cursor-pointer transition-colors text-center">
             <Camera className="w-8 h-8 text-[var(--color-primary)] mb-2" />
-            <span className="text-sm font-semibold text-[var(--color-text)]">
-              Take Photo
-            </span>
-            <span className="text-xs text-[var(--color-text-muted)] mt-0.5">
-              Receipt / Invoice
-            </span>
+            <span className="text-sm font-semibold text-[var(--color-text)]">Take Photo</span>
+            <span className="text-xs text-[var(--color-text-muted)] mt-0.5">Receipt / Invoice</span>
             <input
               type="file"
               accept="image/*"
@@ -152,18 +144,9 @@ export const ScanBillSheet: React.FC<ScanBillSheetProps> = ({
 
           <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-[var(--color-border)] rounded-2xl hover:border-[var(--color-primary)] bg-[var(--color-surface)] cursor-pointer transition-colors text-center">
             <ImageIcon className="w-8 h-8 text-[var(--color-accent)] mb-2" />
-            <span className="text-sm font-semibold text-[var(--color-text)]">
-              From Gallery
-            </span>
-            <span className="text-xs text-[var(--color-text-muted)] mt-0.5">
-              UPI Screenshot
-            </span>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileUpload}
-            />
+            <span className="text-sm font-semibold text-[var(--color-text)]">From Gallery</span>
+            <span className="text-xs text-[var(--color-text-muted)] mt-0.5">UPI Screenshot</span>
+            <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
           </label>
         </div>
 
@@ -191,40 +174,40 @@ export const ScanBillSheet: React.FC<ScanBillSheetProps> = ({
 
         {/* Sample scans — demo mode only, so real weddings never get sample data */}
         {isDemo && (
-        <div className="pt-3 border-t border-[var(--color-border)]">
-          <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider block mb-2">
-            Try Demo Scan Samples:
-          </span>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => handleTestSample('phonepe')}
-              className="p-3 text-left bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] border border-[var(--color-border)] rounded-xl cursor-pointer transition-colors"
-            >
-              <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-primary)]">
-                <QrCode className="w-3.5 h-3.5" />
-                PhonePe Payment
-              </div>
-              <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5 truncate">
-                ₹25,000 Photography advance
-              </p>
-            </button>
+          <div className="pt-3 border-t border-[var(--color-border)]">
+            <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider block mb-2">
+              Try Demo Scan Samples:
+            </span>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => handleTestSample('phonepe')}
+                className="p-3 text-left bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] border border-[var(--color-border)] rounded-xl cursor-pointer transition-colors"
+              >
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-primary)]">
+                  <QrCode className="w-3.5 h-3.5" />
+                  PhonePe Payment
+                </div>
+                <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5 truncate">
+                  ₹25,000 Photography advance
+                </p>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => handleTestSample('bill')}
-              className="p-3 text-left bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] border border-[var(--color-border)] rounded-xl cursor-pointer transition-colors"
-            >
-              <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-accent)]">
-                <ImageIcon className="w-3.5 h-3.5" />
-                Printed Invoice
-              </div>
-              <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5 truncate">
-                ₹48,500 Silk Sarees Bill
-              </p>
-            </button>
+              <button
+                type="button"
+                onClick={() => handleTestSample('bill')}
+                className="p-3 text-left bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] border border-[var(--color-border)] rounded-xl cursor-pointer transition-colors"
+              >
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-accent)]">
+                  <ImageIcon className="w-3.5 h-3.5" />
+                  Printed Invoice
+                </div>
+                <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5 truncate">
+                  ₹48,500 Silk Sarees Bill
+                </p>
+              </button>
+            </div>
           </div>
-        </div>
         )}
       </div>
     </BottomSheet>

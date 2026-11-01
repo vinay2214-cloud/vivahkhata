@@ -1,10 +1,4 @@
-import {
-  collection,
-  doc,
-  addDoc,
-  updateDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
+import { collection, doc, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { WeddingEvent, Side } from '../types';
 

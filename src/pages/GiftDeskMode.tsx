@@ -1,23 +1,15 @@
+import { errorMessage } from '../lib/errors';
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ArrowLeft,
-  Gift as GiftIcon,
-  Check,
-  AlertTriangle,
-  Clock,
-  Sparkles,
-  Zap,
-} from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { ArrowLeft, Gift as GiftIcon, Check, AlertTriangle } from 'lucide-react';
 import { useWedding } from '../context/WeddingContext';
 import { useAuth } from '../context/AuthContext';
 import { useSyncStatus } from '../hooks/useSyncStatus';
 import { SyncPill } from '../components/ui/SyncPill';
 import { AmountText } from '../components/ui/AmountText';
-import { createGift, updateGift, generateNameKey } from '../services/gifts';
+import { createGift, generateNameKey } from '../services/gifts';
 import { toPaise } from '../lib/money';
-import { Gift, Side } from '../types';
+import { Side } from '../types';
 
 interface GiftDeskModeProps {
   onExit: () => void;
@@ -25,7 +17,7 @@ interface GiftDeskModeProps {
 
 export const GiftDeskMode: React.FC<GiftDeskModeProps> = ({ onExit }) => {
   const { t } = useTranslation();
-  const { weddingId, wedding, gifts, events, showToast } = useWedding();
+  const { weddingId, gifts, events, showToast } = useWedding();
   const { user } = useAuth();
   const { isOnline, isSyncing, pendingWrites } = useSyncStatus();
 
@@ -36,7 +28,7 @@ export const GiftDeskMode: React.FC<GiftDeskModeProps> = ({ onExit }) => {
   const [relation, setRelation] = useState<string>('');
   const [amountRupees, setAmountRupees] = useState<string>('');
   const [selectedEventId, setSelectedEventId] = useState<string>('');
-  const [side, setSide] = useState<Side>('common');
+  const [side] = useState<Side>('common');
   const [showGold, setShowGold] = useState(false);
   const [goldGrams, setGoldGrams] = useState<string>('');
   const [goldDesc, setGoldDesc] = useState<string>('');
@@ -49,7 +41,7 @@ export const GiftDeskMode: React.FC<GiftDeskModeProps> = ({ onExit }) => {
 
   // Exit Long-Press
   const [exitProgress, setExitProgress] = useState(0);
-  const exitTimerRef = useRef<any>(null);
+  const exitTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Focus reference for quick continuous entry
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -59,14 +51,16 @@ export const GiftDeskMode: React.FC<GiftDeskModeProps> = ({ onExit }) => {
     if (events.length > 0 && !selectedEventId) {
       setSelectedEventId(events[0].id);
     }
+  }, [events, selectedEventId]);
+
+  // Next envelope number follows the highest one already recorded
+  useEffect(() => {
     const maxEnv = gifts.reduce((max, g) => Math.max(max, g.envelopeNo || 0), 0);
     setEnvelopeNo(maxEnv + 1);
-  }, [events, gifts]);
+  }, [gifts]);
 
   // Session Totals (made during this active desk session)
-  const sessionGifts = gifts.filter(
-    (g) => g.source === 'giftDesk' || g.createdBy === user?.uid
-  );
+  const sessionGifts = gifts.filter((g) => g.source === 'giftDesk' || g.createdBy === user?.uid);
   const sessionTotalPaise = sessionGifts.reduce((sum, g) => sum + g.cashPaise, 0);
 
   // Last 5 entries
@@ -78,8 +72,7 @@ export const GiftDeskMode: React.FC<GiftDeskModeProps> = ({ onExit }) => {
       const key = generateNameKey(giverName);
       const match = gifts.find(
         (g) =>
-          g.nameKey === key &&
-          (!town.trim() || g.town?.toLowerCase() === town.toLowerCase().trim())
+          g.nameKey === key && (!town.trim() || g.town?.toLowerCase() === town.toLowerCase().trim())
       );
       if (match) {
         setDuplicateWarning(
@@ -131,7 +124,9 @@ export const GiftDeskMode: React.FC<GiftDeskModeProps> = ({ onExit }) => {
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         try {
           navigator.vibrate(30);
-        } catch {}
+        } catch {
+          // Vibration is a nicety; ignore browsers that block it.
+        }
       }
 
       // Visual flash
@@ -152,8 +147,8 @@ export const GiftDeskMode: React.FC<GiftDeskModeProps> = ({ onExit }) => {
 
       // Refocus Giver Name input for next 5-second entry
       nameInputRef.current?.focus();
-    } catch (err: any) {
-      showToast(err.message || 'Failed to save gift');
+    } catch (err) {
+      showToast(errorMessage(err, 'Failed to save gift'));
     } finally {
       setLoading(false);
     }
@@ -168,7 +163,7 @@ export const GiftDeskMode: React.FC<GiftDeskModeProps> = ({ onExit }) => {
       const progress = Math.min((elapsed / 1000) * 100, 100);
       setExitProgress(progress);
       if (progress >= 100) {
-        clearInterval(exitTimerRef.current);
+        if (exitTimerRef.current) clearInterval(exitTimerRef.current);
         onExit();
       }
     }, 50);
@@ -176,7 +171,7 @@ export const GiftDeskMode: React.FC<GiftDeskModeProps> = ({ onExit }) => {
 
   const cancelExitPress = () => {
     if (exitTimerRef.current) {
-      clearInterval(exitTimerRef.current);
+      if (exitTimerRef.current) clearInterval(exitTimerRef.current);
       exitTimerRef.current = null;
     }
     setExitProgress(0);
@@ -217,12 +212,11 @@ export const GiftDeskMode: React.FC<GiftDeskModeProps> = ({ onExit }) => {
       <div className="py-2.5 px-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-xs flex items-center justify-between text-xs sm:text-sm font-bold">
         <div className="flex items-center gap-2 text-[var(--color-primary)]">
           <GiftIcon className="w-4 h-4" />
-          <span>
-            Today: {sessionGifts.length} gifts
-          </span>
+          <span>Today: {sessionGifts.length} gifts</span>
         </div>
         <div>
-          Total: <AmountText paise={sessionTotalPaise} className="text-base text-[var(--color-text)]" />
+          Total:{' '}
+          <AmountText paise={sessionTotalPaise} className="text-base text-[var(--color-text)]" />
         </div>
       </div>
 
@@ -376,9 +370,7 @@ export const GiftDeskMode: React.FC<GiftDeskModeProps> = ({ onExit }) => {
           {showGold && (
             <div className="mt-2 p-3 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-xl grid grid-cols-2 gap-2 text-xs">
               <div>
-                <label className="font-semibold block mb-0.5">
-                  {t('gift_desk.gold_grams')}
-                </label>
+                <label className="font-semibold block mb-0.5">{t('gift_desk.gold_grams')}</label>
                 <input
                   type="number"
                   step="0.1"
@@ -390,9 +382,7 @@ export const GiftDeskMode: React.FC<GiftDeskModeProps> = ({ onExit }) => {
               </div>
 
               <div>
-                <label className="font-semibold block mb-0.5">
-                  {t('gift_desk.gold_desc')}
-                </label>
+                <label className="font-semibold block mb-0.5">{t('gift_desk.gold_desc')}</label>
                 <input
                   type="text"
                   value={goldDesc}
@@ -429,16 +419,12 @@ export const GiftDeskMode: React.FC<GiftDeskModeProps> = ({ onExit }) => {
                 className="px-3 py-1.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-between text-xs"
               >
                 <div className="flex items-center gap-2 truncate">
-                  <span className="font-bold text-[var(--color-accent)]">
-                    #{entry.envelopeNo}
-                  </span>
+                  <span className="font-bold text-[var(--color-accent)]">#{entry.envelopeNo}</span>
                   <span className="font-semibold text-[var(--color-text)] truncate">
                     {entry.giverName}
                   </span>
                   {entry.town && (
-                    <span className="text-[var(--color-text-muted)] truncate">
-                      ({entry.town})
-                    </span>
+                    <span className="text-[var(--color-text-muted)] truncate">({entry.town})</span>
                   )}
                 </div>
                 <AmountText

@@ -5,7 +5,9 @@ import hi from '../src/i18n/hi.json';
 import { asAppLanguage, nextLanguage } from '../src/i18n';
 
 const keys = (o: object, prefix = ''): string[] =>
-  Object.entries(o).flatMap(([k, v]) => (typeof v === 'object' && v ? keys(v, `${prefix}${k}.`) : [`${prefix}${k}`]));
+  Object.entries(o).flatMap(([k, v]) =>
+    typeof v === 'object' && v ? keys(v, `${prefix}${k}.`) : [`${prefix}${k}`]
+  );
 
 describe('translations', () => {
   it('Telugu and Hindi cover every English key', () => {
@@ -17,7 +19,13 @@ describe('translations', () => {
   it('keeps the placeholders ({{name}}, {{count}}…) in every language', () => {
     const placeholders = (s: string) => (s.match(/{{\w+}}/g) || []).sort().join(',');
     const flat = (o: object, p = ''): Record<string, string> =>
-      Object.fromEntries(Object.entries(o).flatMap(([k, v]) => (typeof v === 'object' && v ? Object.entries(flat(v, `${p}${k}.`)) : [[`${p}${k}`, v as string]])));
+      Object.fromEntries(
+        Object.entries(o).flatMap(([k, v]) =>
+          typeof v === 'object' && v
+            ? Object.entries(flat(v, `${p}${k}.`))
+            : [[`${p}${k}`, v as string]]
+        )
+      );
     const e = flat(en);
     for (const other of [flat(te), flat(hi)]) {
       for (const k of Object.keys(e)) expect(placeholders(other[k])).toBe(placeholders(e[k]));

@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { parseSpokenTextToDraft } from '../src/lib/aiParser';
 
-const categories = ['venue', 'catering', 'decoration', 'photography', 'clothing', 'priest', 'transport', 'misc'].map((id) => ({
+const categories = [
+  'venue',
+  'catering',
+  'decoration',
+  'photography',
+  'clothing',
+  'priest',
+  'transport',
+  'misc',
+].map((id) => ({
   id,
   label: id,
 }));
@@ -11,17 +20,33 @@ describe('offline voice parser (fallback when AI is unreachable)', () => {
   it('reads a Telugu-English catering advance', () => {
     const d = parse('caterer ki 40 thousand advance ichhamu cash lo, mama pay chesaru');
     expect(d.kind).toBe('expense');
-    expect(d.expense).toMatchObject({ amountRupees: 40000, categoryId: 'catering', mode: 'cash', type: 'advance', paidByName: 'Mama' });
+    expect(d.expense).toMatchObject({
+      amountRupees: 40000,
+      categoryId: 'catering',
+      mode: 'cash',
+      type: 'advance',
+      paidByName: 'Mama',
+    });
   });
 
   it('understands Telugu number words with "nara" (and a half)', () => {
     expect(parse('okati nara laksha').expense?.amountRupees).toBe(150000);
-    expect(parse('nalabhai vela phonepe photographer').expense).toMatchObject({ amountRupees: 40000, mode: 'upi', categoryId: 'photography' });
-    expect(parse('ninna decoration vallaki oka laksha balance ichhamu').expense).toMatchObject({ amountRupees: 100000, type: 'balance' });
+    expect(parse('nalabhai vela phonepe photographer').expense).toMatchObject({
+      amountRupees: 40000,
+      mode: 'upi',
+      categoryId: 'photography',
+    });
+    expect(parse('ninna decoration vallaki oka laksha balance ichhamu').expense).toMatchObject({
+      amountRupees: 100000,
+      type: 'balance',
+    });
   });
 
   it('reads Hindi', () => {
-    expect(parse('pandit ji ko 11000 diye').expense).toMatchObject({ amountRupees: 11000, categoryId: 'priest' });
+    expect(parse('pandit ji ko 11000 diye').expense).toMatchObject({
+      amountRupees: 11000,
+      categoryId: 'priest',
+    });
   });
 
   it('recognises gifts received, including gold', () => {

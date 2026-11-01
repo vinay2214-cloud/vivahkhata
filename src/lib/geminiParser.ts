@@ -43,8 +43,11 @@ async function readOnServer(body: ReadRequest): Promise<RawResult & { message?: 
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const err = new Error((data as { error?: string }).error || `AI request failed (${res.status})`);
-      (err as Error & { code?: string }).code = (data as { code?: string }).code || String(res.status);
+      const err = new Error(
+        (data as { error?: string }).error || `AI request failed (${res.status})`
+      );
+      (err as Error & { code?: string }).code =
+        (data as { code?: string }).code || String(res.status);
       throw err;
     }
     return data as RawResult;
@@ -70,7 +73,11 @@ async function fileToBase64(file: Blob): Promise<string> {
   return btoa(binary);
 }
 
-export async function readBillWithGemini(file: File, ctx: AIContext, thumbnailUrl: string): Promise<ParsedAIDraft> {
+export async function readBillWithGemini(
+  file: File,
+  ctx: AIContext,
+  thumbnailUrl: string
+): Promise<ParsedAIDraft> {
   // Shrink phone photos (often 3–8 MB) so they upload quickly on 4G.
   const compressed = await imageCompression(file, {
     maxWidthOrHeight: 1600,

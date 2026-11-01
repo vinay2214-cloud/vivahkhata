@@ -257,6 +257,10 @@ const EXTRA_GIVERS: Array<[string, string, string, number, 'bride' | 'groom' | '
 async function createExtraGifts(weddingId: string, uid: string): Promise<void> {
   let envelope = 6;
   for (const [giverName, town, relation, rupees, side] of EXTRA_GIVERS) {
-    await createGift(weddingId, { envelopeNo: envelope++, giverName, town, relation, cashPaise: toPaise(rupees), side }, uid);
+    await createGift(
+      weddingId,
+      { envelopeNo: envelope++, giverName, town, relation, cashPaise: toPaise(rupees), side },
+      uid
+    );
   }
 }

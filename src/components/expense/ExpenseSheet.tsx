@@ -1,6 +1,8 @@
+import { logger } from '../../lib/logger';
+import { errorMessage } from '../../lib/errors';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Trash2, Camera, User, Check, Plus } from 'lucide-react';
+import { Trash2, Camera, Check } from 'lucide-react';
 import { BottomSheet } from '../ui/BottomSheet';
 import { Button } from '../ui/Button';
 import { AmountInput } from '../ui/AmountInput';
@@ -88,7 +90,17 @@ export const ExpenseSheet: React.FC<ExpenseSheetProps> = ({
       setPhotos([]);
       setAttachmentIds([]);
     }
-  }, [isOpen, expenseToEdit, defaultVendorId, defaultScheduleItemId, defaultAmountPaise, defaultCategoryId, defaultType, user, profile]);
+  }, [
+    isOpen,
+    expenseToEdit,
+    defaultVendorId,
+    defaultScheduleItemId,
+    defaultAmountPaise,
+    defaultCategoryId,
+    defaultType,
+    user,
+    profile,
+  ]);
 
   if (!weddingId || !user) return null;
 
@@ -153,7 +165,7 @@ export const ExpenseSheet: React.FC<ExpenseSheetProps> = ({
         vendorId,
         scheduleItemId,
         paidByUid: isSomeoneElse ? '' : paidByUid,
-        paidByName: isSomeoneElse ? (paidByName.trim() || 'Someone else') : paidByName,
+        paidByName: isSomeoneElse ? paidByName.trim() || 'Someone else' : paidByName,
         mode,
         type,
         date,
@@ -170,9 +182,9 @@ export const ExpenseSheet: React.FC<ExpenseSheetProps> = ({
         showToast('Expense saved to family ledger', undefined, 'Undo');
       }
       onClose();
-    } catch (err: any) {
-      console.error(err);
-      showToast(err.message || 'Failed to save expense');
+    } catch (err) {
+      logger.error('Expense save failed', err);
+      showToast(errorMessage(err, 'Failed to save expense'));
     } finally {
       setLoading(false);
     }
@@ -185,8 +197,8 @@ export const ExpenseSheet: React.FC<ExpenseSheetProps> = ({
         await softDeleteExpense(weddingId, expenseToEdit.id, user.uid);
         showToast('Expense removed', undefined, 'Undo');
         onClose();
-      } catch (err: any) {
-        showToast(err.message || 'Failed to delete');
+      } catch (err) {
+        showToast(errorMessage(err, 'Failed to delete'));
       }
     }
   };

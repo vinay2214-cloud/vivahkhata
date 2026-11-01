@@ -1,12 +1,6 @@
-import {
-  collection,
-  doc,
-  addDoc,
-  updateDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
+import { collection, doc, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { Expense, PaymentMode, PaymentType, Side } from '../types';
+import { PaymentMode, PaymentType, Side } from '../types';
 
 export interface CreateExpenseInput {
   amountPaise: number;

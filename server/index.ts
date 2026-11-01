@@ -23,7 +23,9 @@ const FIREBASE_PROJECT_ID = process.env.VITE_FIREBASE_PROJECT_ID || 'vivahkatha-
 
 // Firebase ID tokens are checked against Google's public keys — no service account needed.
 const firebaseKeys = createRemoteJWKSet(
-  new URL('https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com')
+  new URL(
+    'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com'
+  )
 );
 
 async function verifyFirebaseToken(token: string): Promise<string> {
@@ -44,5 +46,7 @@ const app = createApp({
 });
 
 app.listen(PORT, () => {
-  console.log(`Vivah Khata running on port ${PORT} (AI ${GEMINI_API_KEY ? 'on' : 'off'}, model ${GEMINI_MODEL})`);
+  console.log(
+    `Vivah Khata running on port ${PORT} (AI ${GEMINI_API_KEY ? 'on' : 'off'}, model ${GEMINI_MODEL})`
+  );
 });

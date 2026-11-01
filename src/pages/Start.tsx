@@ -1,6 +1,7 @@
+import { errorMessage, timeToDate } from '../lib/errors';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PlusCircle, KeyRound, Sparkles, ArrowRight, Heart } from 'lucide-react';
+import { PlusCircle, KeyRound, ArrowRight, Heart } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../context/AuthContext';
 import { useWedding } from '../context/WeddingContext';
@@ -16,7 +17,12 @@ interface StartProps {
   onBack?: () => void;
 }
 
-export const Start: React.FC<StartProps> = ({ onCreateNew, onJoinSuccess, initialCode, onBack }) => {
+export const Start: React.FC<StartProps> = ({
+  onCreateNew,
+  onJoinSuccess,
+  initialCode,
+  onBack,
+}) => {
   const { t } = useTranslation();
   const { user, profile } = useAuth();
   const { selectWedding, showToast } = useWedding();
@@ -48,7 +54,7 @@ export const Start: React.FC<StartProps> = ({ onCreateNew, onJoinSuccess, initia
       }
 
       // Check expiration
-      if (invite.expiresAt && invite.expiresAt.toDate() < new Date()) {
+      if ((timeToDate(invite.expiresAt) ?? new Date(Infinity)) < new Date()) {
         setError('This invite link has expired (valid for 7 days).');
         return;
       }
@@ -60,8 +66,8 @@ export const Start: React.FC<StartProps> = ({ onCreateNew, onJoinSuccess, initia
       selectWedding(invite.weddingId);
       showToast(`Joined ${invite.weddingTitle} as ${invite.role}!`);
       onJoinSuccess(invite.weddingId);
-    } catch (err: any) {
-      setError(err.message || 'Failed to join wedding');
+    } catch (err) {
+      setError(errorMessage(err, 'Failed to join wedding'));
     } finally {
       setLoading(false);
     }
@@ -77,15 +83,14 @@ export const Start: React.FC<StartProps> = ({ onCreateNew, onJoinSuccess, initia
         <h1 className="text-2xl sm:text-3xl font-bold font-serif-wedding text-[var(--color-text)]">
           {t('start.title', { name: profile?.displayName || user?.displayName || 'Family' })}
         </h1>
-        <p className="text-sm text-[var(--color-text-muted)] mt-1.5">
-          {t('start.subtitle')}
-        </p>
+        <p className="text-sm text-[var(--color-text-muted)] mt-1.5">{t('start.subtitle')}</p>
       </div>
 
       {initialCode && (
         <div className="mb-5 p-4 rounded-2xl bg-[var(--color-accent-soft)] border border-[var(--color-accent)] text-sm text-[var(--color-text)]">
-          You were invited to join a family wedding. Your code <span className="font-mono font-bold">{initialCode}</span> is
-          filled in below — just tap <span className="font-bold">{t('start.join_button')}</span>.
+          You were invited to join a family wedding. Your code{' '}
+          <span className="font-mono font-bold">{initialCode}</span> is filled in below — just tap{' '}
+          <span className="font-bold">{t('start.join_button')}</span>.
         </div>
       )}
 
@@ -154,11 +159,7 @@ export const Start: React.FC<StartProps> = ({ onCreateNew, onJoinSuccess, initia
               </Button>
             </div>
 
-            {error && (
-              <p className="text-xs text-[var(--color-danger)] font-medium">
-                {error}
-              </p>
-            )}
+            {error && <p className="text-xs text-[var(--color-danger)] font-medium">{error}</p>}
           </form>
         </div>
 

@@ -9,7 +9,8 @@ function toMillis(value: TimestampLike): number | null {
   if (value == null) return null;
   if (typeof value === 'number') return value;
   if (value instanceof Date) return value.getTime();
-  if (typeof (value as { toDate?: unknown }).toDate === 'function') return (value as { toDate: () => Date }).toDate().getTime();
+  if (typeof (value as { toDate?: unknown }).toDate === 'function')
+    return (value as { toDate: () => Date }).toDate().getTime();
   return null;
 }
 

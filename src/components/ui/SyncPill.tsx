@@ -23,11 +23,7 @@ export const SyncPill: React.FC<SyncPillProps> = ({
         className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-800 border border-amber-300 select-none ${className}`}
       >
         <CloudOff className="w-3 h-3 shrink-0" />
-        <span>
-          {pendingCount > 0
-            ? `${pendingCount} pending offline`
-            : t('app.sync.offline')}
-        </span>
+        <span>{pendingCount > 0 ? `${pendingCount} pending offline` : t('app.sync.offline')}</span>
       </div>
     );
   }

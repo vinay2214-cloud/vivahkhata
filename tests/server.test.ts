@@ -7,21 +7,47 @@ import { HourlyRateLimiter, MAX_TEXT, validateReadRequest } from '../server/vali
 describe('request validation', () => {
   it('accepts a normal voice note', () => {
     const r = validateReadRequest({ kind: 'voice', text: '  caterer ki 5000 ', context: '{}' });
-    expect(r).toEqual({ ok: true, value: { kind: 'voice', text: 'caterer ki 5000', context: '{}' } });
+    expect(r).toEqual({
+      ok: true,
+      value: { kind: 'voice', text: 'caterer ki 5000', context: '{}' },
+    });
   });
 
   it('rejects empty, oversized or unknown requests', () => {
     expect(validateReadRequest(null).ok).toBe(false);
     expect(validateReadRequest({ kind: 'voice', text: '   ', context: '{}' }).ok).toBe(false);
-    expect(validateReadRequest({ kind: 'voice', text: 'a'.repeat(MAX_TEXT + 1), context: '{}' }).ok).toBe(false);
+    expect(
+      validateReadRequest({ kind: 'voice', text: 'a'.repeat(MAX_TEXT + 1), context: '{}' }).ok
+    ).toBe(false);
     expect(validateReadRequest({ kind: 'voice', text: 'hi' }).ok).toBe(false); // no context
     expect(validateReadRequest({ kind: 'sql', text: 'hi', context: '{}' }).ok).toBe(false);
   });
 
   it('only accepts real base64 images of allowed types', () => {
-    expect(validateReadRequest({ kind: 'bill', imageBase64: 'aGVsbG8=', mimeType: 'image/jpeg', context: '{}' }).ok).toBe(true);
-    expect(validateReadRequest({ kind: 'bill', imageBase64: 'aGVsbG8=', mimeType: 'application/pdf', context: '{}' }).ok).toBe(false);
-    expect(validateReadRequest({ kind: 'bill', imageBase64: '<html>', mimeType: 'image/png', context: '{}' }).ok).toBe(false);
+    expect(
+      validateReadRequest({
+        kind: 'bill',
+        imageBase64: 'aGVsbG8=',
+        mimeType: 'image/jpeg',
+        context: '{}',
+      }).ok
+    ).toBe(true);
+    expect(
+      validateReadRequest({
+        kind: 'bill',
+        imageBase64: 'aGVsbG8=',
+        mimeType: 'application/pdf',
+        context: '{}',
+      }).ok
+    ).toBe(false);
+    expect(
+      validateReadRequest({
+        kind: 'bill',
+        imageBase64: '<html>',
+        mimeType: 'image/png',
+        context: '{}',
+      }).ok
+    ).toBe(false);
   });
 });
 
@@ -39,14 +65,26 @@ describe('rate limiter', () => {
 
 describe('Gemini request', () => {
   it('sends the photo as inline data with the receipt instructions', () => {
-    const req = buildGeminiRequest({ kind: 'bill', imageBase64: 'aGVsbG8=', mimeType: 'image/png', context: '{"today":"x"}' });
+    const req = buildGeminiRequest({
+      kind: 'bill',
+      imageBase64: 'aGVsbG8=',
+      mimeType: 'image/png',
+      context: '{"today":"x"}',
+    });
     expect(req.systemInstruction).toMatch(/bill/i);
-    expect(req.contents[0].parts[1]).toEqual({ inlineData: { data: 'aGVsbG8=', mimeType: 'image/png' } });
+    expect(req.contents[0].parts[1]).toEqual({
+      inlineData: { data: 'aGVsbG8=', mimeType: 'image/png' },
+    });
   });
 });
 
 describe('HTTP API', () => {
-  const readWithAI = vi.fn(async () => ({ kind: 'expense', amountRupees: 40000, uncertainFields: [], warnings: [] }));
+  const readWithAI = vi.fn(async () => ({
+    kind: 'expense',
+    amountRupees: 40000,
+    uncertainFields: [],
+    warnings: [],
+  }));
   const app = createApp({
     verifyToken: async (token) => {
       if (token === 'good-token') return 'user-1';
@@ -69,13 +107,21 @@ describe('HTTP API', () => {
   const post = (body: unknown, token?: string) =>
     fetch(`${base}/api/ai/read`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: typeof body === 'string' ? body : JSON.stringify(body),
     });
 
   it('reports health without exposing secrets', async () => {
     const res = await fetch(`${base}/api/health`);
-    expect(await res.json()).toEqual({ ok: true, app: 'Vivah Khata', ai: true, model: 'test-model' });
+    expect(await res.json()).toEqual({
+      ok: true,
+      app: 'Vivah Khata',
+      ai: true,
+      model: 'test-model',
+    });
     expect(res.headers.get('x-content-type-options')).toBe('nosniff');
     expect(res.headers.get('x-frame-options')).toBe('DENY');
     expect(res.headers.get('x-powered-by')).toBeNull();
@@ -94,12 +140,17 @@ describe('HTTP API', () => {
   });
 
   it('returns the AI reading for a signed-in user, then rate-limits', async () => {
-    const ok = await post({ kind: 'voice', text: 'caterer ki 40 thousand', context: '{}' }, 'good-token');
+    const ok = await post(
+      { kind: 'voice', text: 'caterer ki 40 thousand', context: '{}' },
+      'good-token'
+    );
     expect(ok.status).toBe(200);
     expect(await ok.json()).toMatchObject({ amountRupees: 40000 });
     // Limit is 3 per hour in this test app. Used so far: 1 rejected-empty note + 1 success
     // (malformed JSON is refused before sign-in, so it never counts).
-    expect((await post({ kind: 'voice', text: 'again', context: '{}' }, 'good-token')).status).toBe(200);
+    expect((await post({ kind: 'voice', text: 'again', context: '{}' }, 'good-token')).status).toBe(
+      200
+    );
     const blocked = await post({ kind: 'voice', text: 'one more', context: '{}' }, 'good-token');
     expect(blocked.status).toBe(429);
     expect((await blocked.json()).code).toBe('rate_limited');
@@ -127,7 +178,12 @@ describe('HTTP API', () => {
   });
 
   it('answers 503 when no Gemini key is configured', async () => {
-    const noAi = createApp({ verifyToken: async () => 'u', readWithAI: null, model: 'm', aiLimitPerHour: 10 });
+    const noAi = createApp({
+      verifyToken: async () => 'u',
+      readWithAI: null,
+      model: 'm',
+      aiLimitPerHour: 10,
+    });
     const s = noAi.listen(0);
     await new Promise((r) => s.once('listening', r));
     const port = (s.address() as AddressInfo).port;

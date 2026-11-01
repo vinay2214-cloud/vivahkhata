@@ -1,3 +1,4 @@
+import { errorMessage } from '../../lib/errors';
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { BottomSheet } from '../ui/BottomSheet';
@@ -15,11 +16,7 @@ interface VendorModalProps {
   vendorToEdit?: Vendor | null;
 }
 
-export const VendorModal: React.FC<VendorModalProps> = ({
-  isOpen,
-  onClose,
-  vendorToEdit,
-}) => {
+export const VendorModal: React.FC<VendorModalProps> = ({ isOpen, onClose, vendorToEdit }) => {
   const { weddingId, wedding, showToast } = useWedding();
   const { user } = useAuth();
 
@@ -84,11 +81,9 @@ export const VendorModal: React.FC<VendorModalProps> = ({
   const handleUpdateScheduleRow = (
     id: string,
     field: keyof VendorScheduleItem,
-    val: any
+    val: VendorScheduleItem[keyof VendorScheduleItem]
   ) => {
-    setSchedule((prev) =>
-      prev.map((row) => (row.id === id ? { ...row, [field]: val } : row))
-    );
+    setSchedule((prev) => prev.map((row) => (row.id === id ? { ...row, [field]: val } : row)));
   };
 
   const handleRemoveScheduleRow = (id: string) => {
@@ -119,8 +114,8 @@ export const VendorModal: React.FC<VendorModalProps> = ({
         showToast('Vendor added to directory');
       }
       onClose();
-    } catch (err: any) {
-      showToast(err.message || 'Failed to save vendor');
+    } catch (err) {
+      showToast(errorMessage(err, 'Failed to save vendor'));
     } finally {
       setLoading(false);
     }
@@ -133,8 +128,8 @@ export const VendorModal: React.FC<VendorModalProps> = ({
         await softDeleteVendor(weddingId, vendorToEdit.id, user.uid);
         showToast('Vendor removed');
         onClose();
-      } catch (err: any) {
-        showToast(err.message || 'Failed to delete');
+      } catch (err) {
+        showToast(errorMessage(err, 'Failed to delete'));
       }
     }
   };
@@ -240,9 +235,7 @@ export const VendorModal: React.FC<VendorModalProps> = ({
                   <input
                     type="text"
                     value={row.label}
-                    onChange={(e) =>
-                      handleUpdateScheduleRow(row.id, 'label', e.target.value)
-                    }
+                    onChange={(e) => handleUpdateScheduleRow(row.id, 'label', e.target.value)}
                     placeholder="Installment label"
                     className="flex-1 px-2.5 py-1.5 text-sm bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg font-medium"
                   />
@@ -272,9 +265,7 @@ export const VendorModal: React.FC<VendorModalProps> = ({
                   <input
                     type="date"
                     value={row.dueDate || ''}
-                    onChange={(e) =>
-                      handleUpdateScheduleRow(row.id, 'dueDate', e.target.value)
-                    }
+                    onChange={(e) => handleUpdateScheduleRow(row.id, 'dueDate', e.target.value)}
                     className="px-2 py-1.5 text-xs bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg"
                   />
                 </div>

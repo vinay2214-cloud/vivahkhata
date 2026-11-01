@@ -1,6 +1,13 @@
 import { getTodayDateString } from './dates';
 import type { ParsedAIDraft } from '../components/ai/ConfirmCard';
-import type { Member, PaymentMode, PaymentType, Vendor, WeddingCategory, WeddingEvent } from '../types';
+import type {
+  Member,
+  PaymentMode,
+  PaymentType,
+  Vendor,
+  WeddingCategory,
+  WeddingEvent,
+} from '../types';
 
 /**
  * Pure helpers that turn Gemini's raw reading into a draft entry the user confirms.
@@ -49,15 +56,25 @@ export function buildContext(ctx: AIContext): string {
     categories: ctx.categories.filter((c) => !c.hidden).map((c) => ({ id: c.id, label: c.label })),
     vendors: ctx.vendors.filter((v) => !v.deleted).map((v) => v.name),
     members: ctx.members.filter((m) => !m.removed).map((m) => m.displayName),
-    events: ctx.events.filter((e) => !e.deleted).map((e) => ({ name: e.name, date: e.date || null })),
+    events: ctx.events
+      .filter((e) => !e.deleted)
+      .map((e) => ({ name: e.name, date: e.date || null })),
     speakerName: ctx.speakerName,
   });
 }
 
-export const normalise = (s: string) => s.toLowerCase().replace(/[^a-z0-9ఀ-౿ऀ-ॿ]+/g, ' ').trim();
+export const normalise = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9\p{Script=Telugu}\p{Script=Devanagari}]+/gu, ' ')
+    .trim();
 
 /** Finds a list item whose name clearly matches the spoken/read name. */
-export function matchByName<T>(name: string | null, items: T[], getName: (item: T) => string): T | undefined {
+export function matchByName<T>(
+  name: string | null,
+  items: T[],
+  getName: (item: T) => string
+): T | undefined {
   if (!name) return undefined;
   const target = normalise(name);
   if (target.length < 3) return undefined;
@@ -88,7 +105,11 @@ export function toDraft(raw: RawResult, ctx: AIContext, imageThumbnail?: string)
   const warnings = [...(raw.warnings || [])];
   const confidence: Record<string, 'high' | 'medium' | 'low'> = {};
   const uncertain = new Set(raw.uncertainFields || []);
-  const event = matchByName(raw.eventName, ctx.events.filter((e) => !e.deleted), (e) => e.name);
+  const event = matchByName(
+    raw.eventName,
+    ctx.events.filter((e) => !e.deleted),
+    (e) => e.name
+  );
   const amountRupees = cleanAmount(raw.amountRupees, warnings);
 
   const mark = (prefix: 'expense' | 'gift', field: string, value: unknown, rawField = field) => {
@@ -129,8 +150,16 @@ export function toDraft(raw: RawResult, ctx: AIContext, imageThumbnail?: string)
       categoryId = visibleCategories.some((c) => c.id === 'misc') ? 'misc' : null;
       uncertain.add('categoryId');
     }
-    const vendor = matchByName(raw.vendorName, ctx.vendors.filter((v) => !v.deleted), (v) => v.name);
-    const member = matchByName(raw.paidByName, ctx.members.filter((m) => !m.removed), (m) => m.displayName);
+    const vendor = matchByName(
+      raw.vendorName,
+      ctx.vendors.filter((v) => !v.deleted),
+      (v) => v.name
+    );
+    const member = matchByName(
+      raw.paidByName,
+      ctx.members.filter((m) => !m.removed),
+      (m) => m.displayName
+    );
     const mode = MODES.includes(raw.mode as PaymentMode) ? (raw.mode as PaymentMode) : null;
     const type = TYPES.includes(raw.type as PaymentType) ? (raw.type as PaymentType) : null;
     const expense = {

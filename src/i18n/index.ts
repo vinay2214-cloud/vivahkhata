@@ -5,7 +5,11 @@ import te from './te.json';
 import hi from './hi.json';
 
 export type AppLanguage = 'en' | 'te' | 'hi';
-export const LANGUAGE_LABEL: Record<AppLanguage, string> = { en: 'English', te: 'తెలుగు', hi: 'हिन्दी' };
+export const LANGUAGE_LABEL: Record<AppLanguage, string> = {
+  en: 'English',
+  te: 'తెలుగు',
+  hi: 'हिन्दी',
+};
 const ORDER: AppLanguage[] = ['en', 'te', 'hi'];
 
 export const asAppLanguage = (value: string | null | undefined): AppLanguage =>

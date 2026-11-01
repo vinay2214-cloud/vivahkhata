@@ -1,39 +1,44 @@
 :root {
-  --color-primary: #9B1C31;       /* Kumkum red */
-  --color-primary-soft: #F8E4E7;
-  --color-accent: #D99A1E;        /* Turmeric gold */
-  --color-accent-soft: #FBEFD5;
-  --color-success: #2E7D4F;       /* Mango leaf green */
-  --color-warning: #B7791F;
-  --color-danger: #C0392B;
-  --color-bg: #FBF7F1;            /* Sandalwood */
-  --color-surface: #FFFFFF;
-  --color-surface-2: #F4EEE6;
-  --color-border: #E6DDD2;
-  --color-text: #1F1A17;
-  --color-text-muted: #6B6058;
+  --color-primary: #9b1c31; /* Kumkum red */
+  --color-primary-soft: #f8e4e7;
+  --color-accent: #d99a1e; /* Turmeric gold */
+  --color-accent-soft: #fbefd5;
+  --color-success: #2e7d4f; /* Mango leaf green */
+  --color-warning: #b7791f;
+  --color-danger: #c0392b;
+  --color-bg: #fbf7f1; /* Sandalwood */
+  --color-surface: #ffffff;
+  --color-surface-2: #f4eee6;
+  --color-border: #e6ddd2;
+  --color-text: #1f1a17;
+  --color-text-muted: #6b6058;
 }
 
 .dark {
-  --color-primary: #E0566B;
-  --color-primary-soft: #3A1A20;
-  --color-accent: #F2B84B;
-  --color-accent-soft: #3A2E14;
-  --color-success: #5FBF85;
-  --color-warning: #F0B35A;
-  --color-danger: #FF6B5E;
+  --color-primary: #e0566b;
+  --color-primary-soft: #3a1a20;
+  --color-accent: #f2b84b;
+  --color-accent-soft: #3a2e14;
+  --color-success: #5fbf85;
+  --color-warning: #f0b35a;
+  --color-danger: #ff6b5e;
   --color-bg: #141112;
-  --color-surface: #1E1A1B;
-  --color-surface-2: #2A2425;
-  --color-border: #3A3233;
-  --color-text: #F5EFEA;
-  --color-text-muted: #B3A79F;
+  --color-surface: #1e1a1b;
+  --color-surface-2: #2a2425;
+  --color-border: #3a3233;
+  --color-text: #f5efea;
+  --color-text-muted: #b3a79f;
 }
 
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
-  font-family: 'Noto Sans', 'Noto Sans Telugu', system-ui, -apple-system, sans-serif;
+  font-family:
+    'Noto Sans',
+    'Noto Sans Telugu',
+    system-ui,
+    -apple-system,
+    sans-serif;
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;

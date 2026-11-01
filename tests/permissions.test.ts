@@ -32,11 +32,19 @@ describe('role permissions (mirror firestore.rules)', () => {
   it('allows Gift Desk to fix their own gift only within 15 minutes', () => {
     const now = Date.parse('2026-11-22T10:00:00Z');
     const own = { createdBy: 'u1', myUid: 'u1', now };
-    expect(can('giftDesk', 'edit_gift', { ...own, createdAt: new Date(now - 5 * 60 * 1000) })).toBe(true);
-    expect(can('giftDesk', 'edit_gift', { ...own, createdAt: new Date(now - GIFT_EDIT_WINDOW_MS - 1) })).toBe(false);
-    expect(can('giftDesk', 'edit_gift', { ...own, createdAt: { toDate: () => new Date(now - 60_000) } })).toBe(true);
+    expect(can('giftDesk', 'edit_gift', { ...own, createdAt: new Date(now - 5 * 60 * 1000) })).toBe(
+      true
+    );
+    expect(
+      can('giftDesk', 'edit_gift', { ...own, createdAt: new Date(now - GIFT_EDIT_WINDOW_MS - 1) })
+    ).toBe(false);
+    expect(
+      can('giftDesk', 'edit_gift', { ...own, createdAt: { toDate: () => new Date(now - 60_000) } })
+    ).toBe(true);
     expect(can('giftDesk', 'edit_gift', { ...own, createdAt: null })).toBe(true); // still syncing
-    expect(can('giftDesk', 'edit_gift', { createdBy: 'u2', myUid: 'u1', now, createdAt: new Date(now) })).toBe(false);
+    expect(
+      can('giftDesk', 'edit_gift', { createdBy: 'u2', myUid: 'u1', now, createdAt: new Date(now) })
+    ).toBe(false);
     expect(can('owner', 'edit_gift', { createdBy: 'u2', myUid: 'u1' })).toBe(true);
   });
 

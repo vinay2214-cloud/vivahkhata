@@ -1,11 +1,36 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, Sparkles, Volume2 } from 'lucide-react';
+import { Mic, MicOff, Sparkles } from 'lucide-react';
 import { BottomSheet } from '../ui/BottomSheet';
 import { Button } from '../ui/Button';
 import { useWedding } from '../../context/WeddingContext';
 import { useAuth } from '../../context/AuthContext';
 import { parseSpokenTextToDraft } from '../../lib/aiParser';
 import { ParsedAIDraft } from './ConfirmCard';
+import { logger } from '../../lib/logger';
+
+/** Minimal shape of the (vendor-prefixed) Web Speech API that this sheet uses. */
+interface SpeechResultEvent {
+  results: ArrayLike<ArrayLike<{ transcript: string }>>;
+}
+interface SpeechRecognitionLike {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechResultEvent) => void) | null;
+  onerror: (() => void) | null;
+  start(): void;
+  stop(): void;
+}
+type SpeechRecognitionCtor = new () => SpeechRecognitionLike;
+
+function getSpeechRecognition(): SpeechRecognitionCtor | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const w = window as unknown as {
+    SpeechRecognition?: SpeechRecognitionCtor;
+    webkitSpeechRecognition?: SpeechRecognitionCtor;
+  };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition;
+}
 
 interface VoiceRecorderSheetProps {
   isOpen: boolean;
@@ -21,17 +46,15 @@ export const VoiceRecorderSheet: React.FC<VoiceRecorderSheetProps> = ({
   const { wedding, vendors, members, events } = useWedding();
   const { user, profile } = useAuth();
   const isDemo = !!user?.isAnonymous;
-  const speechSupported =
-    typeof window !== 'undefined' &&
-    !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
+  const speechSupported = getSpeechRecognition() !== undefined;
   const [processing, setProcessing] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [transcript, setTranscript] = useState('');
   const [langHint, setLangHint] = useState<'te' | 'hi' | 'en' | 'mixed'>('te');
 
-  const recognitionRef = useRef<any>(null);
-  const timerRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!isOpen) {
@@ -58,8 +81,7 @@ export const VoiceRecorderSheet: React.FC<VoiceRecorderSheetProps> = ({
     }, 1000);
 
     // Try Web Speech API if supported in browser
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = getSpeechRecognition();
 
     if (SpeechRecognition) {
       try {
@@ -68,7 +90,7 @@ export const VoiceRecorderSheet: React.FC<VoiceRecorderSheetProps> = ({
         recognition.interimResults = true;
         recognition.lang = langHint === 'te' ? 'te-IN' : langHint === 'hi' ? 'hi-IN' : 'en-IN';
 
-        recognition.onresult = (event: any) => {
+        recognition.onresult = (event: SpeechResultEvent) => {
           let current = '';
           for (let i = 0; i < event.results.length; i++) {
             current += event.results[i][0].transcript + ' ';
@@ -97,7 +119,9 @@ export const VoiceRecorderSheet: React.FC<VoiceRecorderSheetProps> = ({
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
-      } catch {}
+      } catch {
+        // Recognition may already have stopped; nothing to clean up.
+      }
       recognitionRef.current = null;
     }
   };
@@ -121,7 +145,7 @@ export const VoiceRecorderSheet: React.FC<VoiceRecorderSheetProps> = ({
       });
     } catch (err) {
       // No internet or AI unavailable: simple offline reading that leaves unknowns empty.
-      console.warn('Gemini voice parsing failed, using offline parser', err);
+      logger.warn('Gemini voice parsing failed, using offline parser', err);
       draft = parseSpokenTextToDraft(text, wedding?.categories || []);
     } finally {
       setProcessing(false);
@@ -169,7 +193,13 @@ export const VoiceRecorderSheet: React.FC<VoiceRecorderSheetProps> = ({
                   : 'bg-[var(--color-surface)] text-[var(--color-text-muted)] border-[var(--color-border)]'
               }`}
             >
-              {l === 'te' ? 'తెలుగు (Telugu)' : l === 'hi' ? 'हिंदी (Hindi)' : l === 'en' ? 'English' : 'Mixed'}
+              {l === 'te'
+                ? 'తెలుగు (Telugu)'
+                : l === 'hi'
+                  ? 'हिंदी (Hindi)'
+                  : l === 'en'
+                    ? 'English'
+                    : 'Mixed'}
             </button>
           ))}
         </div>
@@ -197,7 +227,9 @@ export const VoiceRecorderSheet: React.FC<VoiceRecorderSheetProps> = ({
         {/* Status & Timer */}
         <div>
           <p className="text-sm font-semibold text-[var(--color-text)]">
-            {isRecording ? `Listening… (00:${recordingSeconds.toString().padStart(2, '0')})` : 'Tap mic and speak naturally'}
+            {isRecording
+              ? `Listening… (00:${recordingSeconds.toString().padStart(2, '0')})`
+              : 'Tap mic and speak naturally'}
           </p>
           <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
             e.g. "Caterer ki 40 thousand advance ichhamu cash lo"
@@ -217,7 +249,8 @@ export const VoiceRecorderSheet: React.FC<VoiceRecorderSheetProps> = ({
 
         {!speechSupported && (
           <p className="w-full text-xs text-[var(--color-text-muted)] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-xl px-3 py-2">
-            Voice typing isn’t supported in this browser. Use Chrome on Android, or type the note above.
+            Voice typing isn’t supported in this browser. Use Chrome on Android, or type the note
+            above.
           </p>
         )}
 
@@ -237,34 +270,34 @@ export const VoiceRecorderSheet: React.FC<VoiceRecorderSheetProps> = ({
 
         {/* Quick sample prompts — demo mode only, so real weddings never get sample data */}
         {isDemo && (
-        <div className="w-full pt-3 border-t border-[var(--color-border)] text-left">
-          <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider block mb-2">
-            Try Quick Wedding Audio Samples:
-          </span>
-          <div className="flex flex-col gap-1.5">
-            {sampleVoicePrompts.map((s, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => {
-                  setTranscript(s.text);
-                  handleProcess(s.text);
-                }}
-                className="text-left px-3 py-2 text-xs bg-[var(--color-surface)] hover:bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] flex items-center justify-between gap-2 cursor-pointer transition-colors"
-              >
-                <div>
-                  <span className="font-semibold text-[var(--color-primary)] block">
-                    {s.label}
-                  </span>
-                  <span className="text-[var(--color-text-muted)] italic truncate">
-                    "{s.text}"
-                  </span>
-                </div>
-                <Sparkles className="w-4 h-4 text-[var(--color-accent)] shrink-0" />
-              </button>
-            ))}
+          <div className="w-full pt-3 border-t border-[var(--color-border)] text-left">
+            <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider block mb-2">
+              Try Quick Wedding Audio Samples:
+            </span>
+            <div className="flex flex-col gap-1.5">
+              {sampleVoicePrompts.map((s, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    setTranscript(s.text);
+                    handleProcess(s.text);
+                  }}
+                  className="text-left px-3 py-2 text-xs bg-[var(--color-surface)] hover:bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] flex items-center justify-between gap-2 cursor-pointer transition-colors"
+                >
+                  <div>
+                    <span className="font-semibold text-[var(--color-primary)] block">
+                      {s.label}
+                    </span>
+                    <span className="text-[var(--color-text-muted)] italic truncate">
+                      "{s.text}"
+                    </span>
+                  </div>
+                  <Sparkles className="w-4 h-4 text-[var(--color-accent)] shrink-0" />
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
         )}
       </div>
     </BottomSheet>

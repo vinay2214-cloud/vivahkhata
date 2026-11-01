@@ -1,12 +1,6 @@
-import {
-  collection,
-  doc,
-  addDoc,
-  updateDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
+import { collection, doc, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { Vendor, VendorScheduleItem } from '../types';
+import { VendorScheduleItem } from '../types';
 
 export interface CreateVendorInput {
   name: string;

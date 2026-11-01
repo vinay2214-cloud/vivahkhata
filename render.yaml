@@ -4,14 +4,14 @@ services:
     name: vivahkhata
     runtime: node
     plan: free
-    region: singapore          # closest Render region to India
+    region: singapore # closest Render region to India
     buildCommand: npm ci && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
       - key: NODE_VERSION
-        value: "22"
+        value: '22'
       - key: NODE_ENV
         value: production
       - key: GEMINI_MODEL

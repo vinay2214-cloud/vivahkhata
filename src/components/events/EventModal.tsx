@@ -1,10 +1,15 @@
+import { errorMessage } from '../../lib/errors';
 import React, { useState, useEffect } from 'react';
 import { BottomSheet } from '../ui/BottomSheet';
 import { Button } from '../ui/Button';
 import { AmountInput } from '../ui/AmountInput';
 import { useWedding } from '../../context/WeddingContext';
 import { useAuth } from '../../context/AuthContext';
-import { createWeddingEvent, updateWeddingEvent, softDeleteWeddingEvent } from '../../services/events';
+import {
+  createWeddingEvent,
+  updateWeddingEvent,
+  softDeleteWeddingEvent,
+} from '../../services/events';
 import { WeddingEvent, Side } from '../../types';
 
 interface EventModalProps {
@@ -13,11 +18,7 @@ interface EventModalProps {
   eventToEdit?: WeddingEvent | null;
 }
 
-export const EventModal: React.FC<EventModalProps> = ({
-  isOpen,
-  onClose,
-  eventToEdit,
-}) => {
+export const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, eventToEdit }) => {
   const { weddingId, wedding, events, showToast } = useWedding();
   const { user } = useAuth();
 
@@ -95,8 +96,8 @@ export const EventModal: React.FC<EventModalProps> = ({
         showToast('Event added to wedding schedule');
       }
       onClose();
-    } catch (err: any) {
-      showToast(err.message || 'Failed to save event');
+    } catch (err) {
+      showToast(errorMessage(err, 'Failed to save event'));
     } finally {
       setLoading(false);
     }
@@ -109,8 +110,8 @@ export const EventModal: React.FC<EventModalProps> = ({
         await softDeleteWeddingEvent(weddingId, eventToEdit.id, user.uid);
         showToast('Event removed');
         onClose();
-      } catch (err: any) {
-        showToast(err.message || 'Failed to delete');
+      } catch (err) {
+        showToast(errorMessage(err, 'Failed to delete'));
       }
     }
   };

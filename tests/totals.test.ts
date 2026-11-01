@@ -4,9 +4,28 @@ import { expense, gift, vendor } from './fixtures';
 
 describe('computeWeddingTotals', () => {
   const expenses = [
-    expense({ amountPaise: 4000000, categoryId: 'catering', paidByName: 'Kiran', mode: 'upi', eventId: 'e1', vendorId: 'v1' }),
-    expense({ amountPaise: 2500000, categoryId: 'photography', paidByName: 'Kiran', mode: 'cash', eventId: 'e2' }),
-    expense({ amountPaise: 1000000, categoryId: 'catering', paidByName: 'Lakshmi', mode: 'cash', eventId: 'e1' }),
+    expense({
+      amountPaise: 4000000,
+      categoryId: 'catering',
+      paidByName: 'Kiran',
+      mode: 'upi',
+      eventId: 'e1',
+      vendorId: 'v1',
+    }),
+    expense({
+      amountPaise: 2500000,
+      categoryId: 'photography',
+      paidByName: 'Kiran',
+      mode: 'cash',
+      eventId: 'e2',
+    }),
+    expense({
+      amountPaise: 1000000,
+      categoryId: 'catering',
+      paidByName: 'Lakshmi',
+      mode: 'cash',
+      eventId: 'e1',
+    }),
     expense({ amountPaise: 9900000, categoryId: 'venue', deleted: true }), // soft-deleted: must be ignored
   ];
   const gifts = [

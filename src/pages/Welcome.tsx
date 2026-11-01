@@ -1,6 +1,7 @@
+import { logger } from '../lib/logger';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IndianRupee, Gift, WifiOff, Sparkles, ArrowRight } from 'lucide-react';
+import { IndianRupee, Gift, WifiOff, Sparkles } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../context/AuthContext';
 import { switchLanguage, nextLanguage, asAppLanguage, LANGUAGE_LABEL } from '../i18n';
@@ -23,7 +24,7 @@ export const Welcome: React.FC<WelcomeProps> = ({ onSuccess }) => {
       await signInWithGoogle();
       onSuccess();
     } catch (error) {
-      console.error(error);
+      logger.error('Sign-in failed', error);
     } finally {
       setLoading(false);
     }
@@ -35,7 +36,7 @@ export const Welcome: React.FC<WelcomeProps> = ({ onSuccess }) => {
       await signInDemo();
       onSuccess();
     } catch (error) {
-      console.error(error);
+      logger.error('Sign-in failed', error);
     } finally {
       setDemoLoading(false);
     }

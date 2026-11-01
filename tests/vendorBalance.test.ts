@@ -39,7 +39,9 @@ describe('computeVendorBalance', () => {
   });
 
   it('caps progress at 100% and balance at zero when overpaid', () => {
-    const summary = computeVendorBalance(decorator, [expense({ vendorId: 'v1', amountPaise: 25000000 })]);
+    const summary = computeVendorBalance(decorator, [
+      expense({ vendorId: 'v1', amountPaise: 25000000 }),
+    ]);
     expect(summary.balancePaise).toBe(0);
     expect(summary.progressPercent).toBe(100);
   });

@@ -46,7 +46,10 @@ export function validateReadRequest(body: unknown): ValidationResult {
     if (!giverName || relation === null || town === null || hostNames === null) {
       return { ok: false, error: 'Giver name is missing or too long' };
     }
-    if (amount != null && (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0 || amount > 100_000_000)) {
+    if (
+      amount != null &&
+      (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0 || amount > 100_000_000)
+    ) {
       return { ok: false, error: 'Amount is not valid' };
     }
     if (!(THANKS_LANGUAGES as readonly string[]).includes(b.language as string)) {

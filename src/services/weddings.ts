@@ -87,9 +87,7 @@ export async function createWedding(input: CreateWeddingInput): Promise<string> 
     // 4. Update user's weddingIds list and lastWeddingId
     const userRef = doc(db, 'users', input.ownerUid);
     const userSnap = await getDoc(userRef);
-    const existingWeddingIds = userSnap.exists()
-      ? userSnap.data().weddingIds || []
-      : [];
+    const existingWeddingIds = userSnap.exists() ? userSnap.data().weddingIds || [] : [];
     if (!existingWeddingIds.includes(wid)) {
       existingWeddingIds.push(wid);
     }
@@ -110,10 +108,7 @@ export async function createWedding(input: CreateWeddingInput): Promise<string> 
   }
 }
 
-export async function updateWedding(
-  wid: string,
-  data: Partial<Wedding>
-): Promise<void> {
+export async function updateWedding(wid: string, data: Partial<Wedding>): Promise<void> {
   const path = `weddings/${wid}`;
   try {
     const weddingRef = doc(db, 'weddings', wid);

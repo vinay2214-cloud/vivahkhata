@@ -22,7 +22,9 @@ describe('settleUp', () => {
     const r = settleUp({ A: 100001, B: 100000, C: 100000 });
     expect(r.balances.reduce((s, b) => s + b.balancePaise, 0)).toBe(0);
     const moved = r.transfers.reduce((s, t) => s + t.amountPaise, 0);
-    const owed = r.balances.filter((b) => b.balancePaise < 0).reduce((s, b) => s - b.balancePaise, 0);
+    const owed = r.balances
+      .filter((b) => b.balancePaise < 0)
+      .reduce((s, b) => s - b.balancePaise, 0);
     expect(moved).toBe(owed);
   });
 
@@ -38,15 +40,29 @@ describe('settleUp', () => {
 describe('giver history', () => {
   const gifts = [
     gift({ id: '1', giverName: 'Ramesh Garu', nameKey: 'ramesh garu', cashPaise: 500000 }),
-    gift({ id: '2', giverName: 'Ramesh Garu', nameKey: 'ramesh garu', cashPaise: 300000, goldMg: 2000 }),
+    gift({
+      id: '2',
+      giverName: 'Ramesh Garu',
+      nameKey: 'ramesh garu',
+      cashPaise: 300000,
+      goldMg: 2000,
+    }),
     gift({ id: '3', giverName: 'Sita', nameKey: 'sita', cashPaise: 100000 }),
     gift({ id: '4', giverName: 'Sita', nameKey: 'sita', cashPaise: 999999, deleted: true }),
   ];
 
   it('combines repeat givers and skips deleted gifts', () => {
     const rows = summariseGivers(gifts);
-    expect(rows[0]).toMatchObject({ giverName: 'Ramesh Garu', count: 2, totalCashPaise: 800000, totalGoldMg: 2000 });
-    expect(rows.find((r) => r.nameKey === 'sita')).toMatchObject({ count: 1, totalCashPaise: 100000 });
+    expect(rows[0]).toMatchObject({
+      giverName: 'Ramesh Garu',
+      count: 2,
+      totalCashPaise: 800000,
+      totalGoldMg: 2000,
+    });
+    expect(rows.find((r) => r.nameKey === 'sita')).toMatchObject({
+      count: 1,
+      totalCashPaise: 100000,
+    });
   });
 
   it('lists only people who gave more than once', () => {

@@ -14,8 +14,6 @@ export const AmountText: React.FC<AmountTextProps> = ({
 }) => {
   const formatted = compact ? compactINR(paise) : formatINR(paise);
   return (
-    <span className={`tabular-nums font-semibold tracking-tight ${className}`}>
-      {formatted}
-    </span>
+    <span className={`tabular-nums font-semibold tracking-tight ${className}`}>{formatted}</span>
   );
 };

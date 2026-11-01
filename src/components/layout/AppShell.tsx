@@ -8,13 +8,9 @@ import {
   Menu,
   Mic,
   Camera,
-  Users,
   Calendar,
   LogOut,
-  ChevronDown,
-  Sparkles,
   Store,
-  Layers,
 } from 'lucide-react';
 import { useWedding } from '../../context/WeddingContext';
 import { useAuth } from '../../context/AuthContext';
@@ -48,12 +44,11 @@ export const AppShell: React.FC<AppShellProps> = ({
   children,
 }) => {
   const { t, i18n } = useTranslation();
-  const { wedding, selectWedding } = useWedding();
+  const { wedding } = useWedding();
   const { user, profile, signOut } = useAuth();
   const { isOnline, isSyncing, pendingWrites } = useSyncStatus();
 
   const [isAddActionOpen, setIsAddActionOpen] = useState(false);
-  const [isWeddingMenuOpen, setIsWeddingMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
   const currentLang = asAppLanguage(i18n.language);
@@ -185,10 +180,7 @@ export const AppShell: React.FC<AppShellProps> = ({
               className="cursor-pointer"
               aria-label="Profile"
             >
-              <Avatar
-                name={profile?.displayName || user?.displayName || 'Family'}
-                size="sm"
-              />
+              <Avatar name={profile?.displayName || user?.displayName || 'Family'} size="sm" />
             </button>
           </div>
         </header>
@@ -236,9 +228,7 @@ export const AppShell: React.FC<AppShellProps> = ({
         )}
 
         {/* Page Content */}
-        <main className="flex-1 pb-24 lg:pb-8 max-w-5xl w-full mx-auto p-4 sm:p-6">
-          {children}
-        </main>
+        <main className="flex-1 pb-24 lg:pb-8 max-w-5xl w-full mx-auto p-4 sm:p-6">{children}</main>
 
         {/* Mobile Bottom Navigation Bar (< 1024px) */}
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--color-surface)]/95 backdrop-blur-lg border-t border-[var(--color-border)] px-3 py-1.5 flex items-center justify-around pb-[max(env(safe-area-inset-bottom),0.5rem)]">
@@ -331,12 +321,8 @@ export const AppShell: React.FC<AppShellProps> = ({
             <div className="w-12 h-12 rounded-xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center mb-2">
               <IndianRupee className="w-6 h-6" />
             </div>
-            <span className="font-bold text-sm text-[var(--color-text)]">
-              Expense (ఖర్చు)
-            </span>
-            <span className="text-xs text-[var(--color-text-muted)] mt-0.5">
-              Quick tap entry
-            </span>
+            <span className="font-bold text-sm text-[var(--color-text)]">Expense (ఖర్చు)</span>
+            <span className="text-xs text-[var(--color-text-muted)] mt-0.5">Quick tap entry</span>
           </button>
 
           {/* Add Gift */}
@@ -351,9 +337,7 @@ export const AppShell: React.FC<AppShellProps> = ({
             <div className="w-12 h-12 rounded-xl bg-[var(--color-accent-soft)] text-[var(--color-accent)] flex items-center justify-center mb-2">
               <GiftIcon className="w-6 h-6" />
             </div>
-            <span className="font-bold text-sm text-[var(--color-text)]">
-              Gift (చదివింపులు)
-            </span>
+            <span className="font-bold text-sm text-[var(--color-text)]">Gift (చదివింపులు)</span>
             <span className="text-xs text-[var(--color-text-muted)] mt-0.5">
               Cash & gold records
             </span>
@@ -371,9 +355,7 @@ export const AppShell: React.FC<AppShellProps> = ({
             <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2">
               <Mic className="w-6 h-6" />
             </div>
-            <span className="font-bold text-sm text-[var(--color-text)]">
-              Voice Note (వాయిస్)
-            </span>
+            <span className="font-bold text-sm text-[var(--color-text)]">Voice Note (వాయిస్)</span>
             <span className="text-xs text-[var(--color-text-muted)] mt-0.5">
               Speak in Telugu / Hindi
             </span>
@@ -391,9 +373,7 @@ export const AppShell: React.FC<AppShellProps> = ({
             <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center mb-2">
               <Camera className="w-6 h-6" />
             </div>
-            <span className="font-bold text-sm text-[var(--color-text)]">
-              Scan Bill / UPI
-            </span>
+            <span className="font-bold text-sm text-[var(--color-text)]">Scan Bill / UPI</span>
             <span className="text-xs text-[var(--color-text-muted)] mt-0.5">
               Photo OCR extraction
             </span>
@@ -411,9 +391,7 @@ export const AppShell: React.FC<AppShellProps> = ({
             <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center mb-1.5">
               <Store className="w-5 h-5" />
             </div>
-            <span className="font-bold text-xs text-[var(--color-text)]">
-              Vendor & Dues
-            </span>
+            <span className="font-bold text-xs text-[var(--color-text)]">Vendor & Dues</span>
           </button>
 
           {/* Add Event */}
@@ -428,9 +406,7 @@ export const AppShell: React.FC<AppShellProps> = ({
             <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-1.5">
               <Calendar className="w-5 h-5" />
             </div>
-            <span className="font-bold text-xs text-[var(--color-text)]">
-              Add Ceremony
-            </span>
+            <span className="font-bold text-xs text-[var(--color-text)]">Add Ceremony</span>
           </button>
         </div>
       </BottomSheet>

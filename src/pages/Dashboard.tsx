@@ -3,15 +3,11 @@ import { useTranslation } from 'react-i18next';
 import {
   IndianRupee,
   Gift,
-  AlertCircle,
   Calendar,
-  Users,
-  MapPin,
   Clock,
   ArrowRight,
   Sparkles,
   CheckCircle2,
-  Store,
 } from 'lucide-react';
 import { useWedding } from '../context/WeddingContext';
 import { useAuth } from '../context/AuthContext';
@@ -19,7 +15,6 @@ import { seedDemoWedding } from '../services/demoData';
 import { StatCard } from '../components/ui/StatCard';
 import { AmountText } from '../components/ui/AmountText';
 import { Badge } from '../components/ui/Badge';
-import { ProgressBar } from '../components/ui/ProgressBar';
 import { formatDate, formatCountdown } from '../lib/dates';
 import { computeVendorBalance } from '../domain/vendorBalance';
 import { settleUp } from '../domain/settle';
@@ -35,15 +30,19 @@ interface DashboardProps {
 export const Dashboard: React.FC<DashboardProps> = ({
   onNavigateTab,
   onOpenExpenseSheet,
-  onOpenGiftSheet,
   onOpenVendorModal,
   onOpenInviteModal,
 }) => {
   const { t } = useTranslation();
-  const { weddingId, wedding, totals, expenses, vendors, gifts, events, members, showToast } = useWedding();
+  const { weddingId, wedding, totals, expenses, vendors, gifts, events, members, showToast } =
+    useWedding();
   const { user } = useAuth();
   const [loadingSample, setLoadingSample] = useState(false);
-  const showSampleBanner = Boolean(user?.isAnonymous) && expenses.length === 0 && gifts.length === 0 && vendors.length === 0;
+  const showSampleBanner =
+    Boolean(user?.isAnonymous) &&
+    expenses.length === 0 &&
+    gifts.length === 0 &&
+    vendors.length === 0;
 
   const loadSample = async () => {
     if (!weddingId || !user || loadingSample) return;
@@ -125,7 +124,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div>
             <p className="font-bold text-sm text-[var(--color-primary)]">Exploring in Demo Mode</p>
             <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
-              Fill this wedding with a realistic sample — vendors, dues, expenses and gift envelopes — in one tap.
+              Fill this wedding with a realistic sample — vendors, dues, expenses and gift envelopes
+              — in one tap.
             </p>
           </div>
           <button
@@ -299,9 +299,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <Gift className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h3 className="font-bold text-base">
-              {t('dashboard.open_gift_desk')}
-            </h3>
+            <h3 className="font-bold text-base">{t('dashboard.open_gift_desk')}</h3>
             <p className="text-xs text-white/80 mt-0.5">
               High-speed, large-keypad entry for volunteers at the venue table
             </p>
@@ -329,9 +327,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {nextUpcomingDues.length === 0 ? (
-          <p className="text-xs text-[var(--color-text-muted)] py-2">
-            {t('dashboard.no_dues')}
-          </p>
+          <p className="text-xs text-[var(--color-text-muted)] py-2">{t('dashboard.no_dues')}</p>
         ) : (
           <div className="flex flex-col gap-2.5">
             {nextUpcomingDues.map((item, idx) => (
@@ -376,9 +372,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <span className="text-[11px] font-bold text-[var(--color-primary)] uppercase tracking-wider block">
                 {t('dashboard.next_event')}
               </span>
-              <h3 className="font-bold text-base text-[var(--color-text)]">
-                {nextEvent.name}
-              </h3>
+              <h3 className="font-bold text-base text-[var(--color-text)]">{nextEvent.name}</h3>
               <p className="text-xs text-[var(--color-text-muted)] mt-0.5 flex items-center gap-1.5">
                 {nextEvent.date && <span>{formatDate(nextEvent.date)}</span>}
                 {nextEvent.venue && <span>• {nextEvent.venue}</span>}
@@ -411,7 +405,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
           ) : (
             <div className="flex flex-col gap-3">
               {categoriesWithSpend.map((cat) => {
-                const ratio = totals.totalSpentPaise > 0 ? (cat.spentPaise / totals.totalSpentPaise) * 100 : 0;
+                const ratio =
+                  totals.totalSpentPaise > 0 ? (cat.spentPaise / totals.totalSpentPaise) * 100 : 0;
                 return (
                   <div key={cat.id} className="flex flex-col gap-1">
                     <div className="flex justify-between text-xs font-semibold">
@@ -444,7 +439,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
           ) : (
             <div className="flex flex-col gap-3">
               {payers.map((payer, idx) => {
-                const ratio = totals.totalSpentPaise > 0 ? (payer.amount / totals.totalSpentPaise) * 100 : 0;
+                const ratio =
+                  totals.totalSpentPaise > 0 ? (payer.amount / totals.totalSpentPaise) * 100 : 0;
                 return (
                   <div key={idx} className="flex flex-col gap-1">
                     <div className="flex justify-between text-xs font-semibold">
@@ -467,8 +463,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Settle up — who owes whom if everyone who paid shares equally */}
       {settle.balances.length > 1 && (
-        <section className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs" aria-labelledby="settle-title">
-          <h2 id="settle-title" className="font-bold text-sm text-[var(--color-text)] uppercase tracking-wider">
+        <section
+          className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs"
+          aria-labelledby="settle-title"
+        >
+          <h2
+            id="settle-title"
+            className="font-bold text-sm text-[var(--color-text)] uppercase tracking-wider"
+          >
             Settle up
           </h2>
           <p className="text-xs text-[var(--color-text-muted)] mt-1 mb-4">
@@ -476,15 +478,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <AmountText paise={settle.sharePaise} className="font-bold" />.
           </p>
           {settle.transfers.length === 0 ? (
-            <p className="text-sm font-semibold text-[var(--color-success)]">Everyone is even. Nothing to settle.</p>
+            <p className="text-sm font-semibold text-[var(--color-success)]">
+              Everyone is even. Nothing to settle.
+            </p>
           ) : (
             <ul className="flex flex-col gap-2">
               {settle.transfers.map((tr) => (
-                <li key={`${tr.from}-${tr.to}`} className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[var(--color-surface-2)] text-sm">
+                <li
+                  key={`${tr.from}-${tr.to}`}
+                  className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[var(--color-surface-2)] text-sm"
+                >
                   <span className="font-semibold text-[var(--color-text)] min-w-0 truncate">
-                    {tr.from} <ArrowRight className="inline w-3.5 h-3.5 mx-1 text-[var(--color-text-muted)]" aria-label="pays" /> {tr.to}
+                    {tr.from}{' '}
+                    <ArrowRight
+                      className="inline w-3.5 h-3.5 mx-1 text-[var(--color-text-muted)]"
+                      aria-label="pays"
+                    />{' '}
+                    {tr.to}
                   </span>
-                  <AmountText paise={tr.amountPaise} className="font-bold text-[var(--color-primary)] shrink-0" />
+                  <AmountText
+                    paise={tr.amountPaise}
+                    className="font-bold text-[var(--color-primary)] shrink-0"
+                  />
                 </li>
               ))}
             </ul>

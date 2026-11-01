@@ -44,18 +44,15 @@ export function computeWeddingTotals(
 
     // By event
     if (exp.eventId) {
-      spentByEventPaise[exp.eventId] =
-        (spentByEventPaise[exp.eventId] || 0) + exp.amountPaise;
+      spentByEventPaise[exp.eventId] = (spentByEventPaise[exp.eventId] || 0) + exp.amountPaise;
     }
 
     // By payer
     const payer = exp.paidByName || 'Unknown';
-    spentByPayerPaise[payer] =
-      (spentByPayerPaise[payer] || 0) + exp.amountPaise;
+    spentByPayerPaise[payer] = (spentByPayerPaise[payer] || 0) + exp.amountPaise;
 
     // By mode
-    spentByModePaise[exp.mode] =
-      (spentByModePaise[exp.mode] || 0) + exp.amountPaise;
+    spentByModePaise[exp.mode] = (spentByModePaise[exp.mode] || 0) + exp.amountPaise;
   }
 
   // Gifts totals

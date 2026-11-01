@@ -1,6 +1,0 @@
-{
-  "name": "Vivah Khata",
-  "description": "A shared family ledger for Indian weddings to record expenses, vendor dues, gifts received, and guest lists.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

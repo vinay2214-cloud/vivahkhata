@@ -16,7 +16,14 @@ export function summariseGivers(gifts: Gift[]): GiverSummary[] {
   for (const g of gifts) {
     if (g.deleted) continue;
     const key = g.nameKey || generateNameKey(g.giverName);
-    const row = byKey.get(key) ?? { nameKey: key, giverName: g.giverName, town: g.town, count: 0, totalCashPaise: 0, totalGoldMg: 0 };
+    const row = byKey.get(key) ?? {
+      nameKey: key,
+      giverName: g.giverName,
+      town: g.town,
+      count: 0,
+      totalCashPaise: 0,
+      totalGoldMg: 0,
+    };
     row.count += 1;
     row.totalCashPaise += g.cashPaise || 0;
     row.totalGoldMg += g.goldMg || 0;
@@ -26,4 +33,5 @@ export function summariseGivers(gifts: Gift[]): GiverSummary[] {
 }
 
 /** Givers who gave more than once. */
-export const repeatGivers = (gifts: Gift[]): GiverSummary[] => summariseGivers(gifts).filter((g) => g.count > 1);
+export const repeatGivers = (gifts: Gift[]): GiverSummary[] =>
+  summariseGivers(gifts).filter((g) => g.count > 1);

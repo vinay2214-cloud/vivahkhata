@@ -6,11 +6,11 @@ Time: about 20 minutes. Cost: ₹0.
 
 You will collect **3 values** on the way — keep a notes app open:
 
-| # | Name | Where it comes from | Secret? |
-|---|------|---------------------|---------|
-| 1 | `VITE_FIREBASE_API_KEY` | Firebase web app (Step 1) | No — public by design |
-| 2 | `VITE_FIREBASE_APP_ID` | Firebase web app (Step 1) | No — public by design |
-| 3 | `GEMINI_API_KEY` | Google AI Studio (Step 5) | **Yes — never share or put in GitHub** |
+| #   | Name                    | Where it comes from       | Secret?                                |
+| --- | ----------------------- | ------------------------- | -------------------------------------- |
+| 1   | `VITE_FIREBASE_API_KEY` | Firebase web app (Step 1) | No — public by design                  |
+| 2   | `VITE_FIREBASE_APP_ID`  | Firebase web app (Step 1) | No — public by design                  |
+| 3   | `GEMINI_API_KEY`        | Google AI Studio (Step 5) | **Yes — never share or put in GitHub** |
 
 ---
 
@@ -77,6 +77,7 @@ These rules make sure only family members you invite can see a wedding.
    (Render may add letters if the name is taken — use exactly what it shows).
 
 **If "Blueprint" fails or isn't offered**, create it manually: **+ New → Web Service** → pick the repo →
+
 - Runtime: **Node** · Region: **Singapore** · Plan: **Free**
 - Build command: `npm ci && npm run build`
 - Start command: `npm start`
@@ -87,14 +88,14 @@ These rules make sure only family members you invite can see a wedding.
 1. Firebase → **Authentication** → **Settings** tab → **Authorized domains** → **Add domain**.
 2. Type your Render address **without** `https://` — e.g. `vivahkhata.onrender.com` → **Add**.
 
-Without this, sign-in shows *"auth/unauthorized-domain"*.
+Without this, sign-in shows _"auth/unauthorized-domain"_.
 
 ## Step 8 — Check it works (5 min)
 
 - [ ] Open `https://<your-link>/api/health` → shows `"ai":true`. (If `false`, the Gemini key wasn't saved — Step 6.)
 - [ ] Open the main link on your phone → **Continue with Google** → create a wedding.
 - [ ] Add an expense → it shows in Money.
-- [ ] Voice: say *"caterer ki 40 thousand advance ichhamu cash lo"* → card shows ₹40,000 · Catering · Cash · Advance.
+- [ ] Voice: say _"caterer ki 40 thousand advance ichhamu cash lo"_ → card shows ₹40,000 · Catering · Cash · Advance.
 - [ ] Scan a real bill or PhonePe screenshot → check the amount → Save.
 - [ ] Members → Invite → open the link on a second Google account → code is filled in → Join.
 - [ ] Airplane mode → add an expense → back online → it syncs.
@@ -106,6 +107,7 @@ Without this, sign-in shows *"auth/unauthorized-domain"*.
 - One person creates the wedding; everyone else joins with an invite link from **Members**.
 
 ### Good to know about the free Render plan
+
 - The app **goes to sleep after 15 minutes** with no visitors. The next person to open it waits **up to a minute** while it wakes; after that it's fast.
 - Data is safe while it sleeps — it lives in Firebase, not on Render.
 - Upgrade later to Render "Starter" (~$7/month) if the wake-up wait bothers the family, especially on the wedding day.
@@ -117,6 +119,7 @@ Without this, sign-in shows *"auth/unauthorized-domain"*.
 Changes pushed to the `main` branch on GitHub deploy automatically.
 
 To edit on your Mac:
+
 ```bash
 cd ~/Desktop
 git clone https://github.com/vinay2214-cloud/vivahkhata.git
@@ -126,6 +129,7 @@ cp .env.example .env.local     # then fill in the 3 values
 npm run dev:server   # terminal 1 — AI server on :8787
 npm run dev          # terminal 2 — app on http://localhost:3000
 ```
+
 Then `git add . && git commit -m "what changed" && git push`.
 
 If you change `firestore.rules`, paste it into Firebase → Firestore → Rules → **Publish** again.
@@ -134,13 +138,13 @@ If you change `firestore.rules`, paste it into Firebase → Firestore → Rules 
 
 ## Troubleshooting
 
-| What you see | Fix |
-|---|---|
-| "Vivah Khata is almost ready" page | Firebase values missing in Render → Environment → add, then **Manual Deploy → Clear build cache & deploy** |
-| `auth/unauthorized-domain` | Step 7 |
-| "Missing or insufficient permissions" | Step 4 — rules not published |
-| "AI reading is not switched on" | `GEMINI_API_KEY` missing or wrong in Render → Environment |
-| "Too many requests" | Gemini free limit or 40 AI reads/hour per person — wait, or raise `AI_LIMIT_PER_HOUR` in Render |
-| Changed a `VITE_…` value but nothing changed | These are baked in at build time — redeploy after changing them |
-| Voice button hears nothing | Use Chrome on Android; on iPhone type the note instead |
-| "Try Demo" errors | Step 2 — enable Anonymous |
+| What you see                                 | Fix                                                                                                        |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| "Vivah Khata is almost ready" page           | Firebase values missing in Render → Environment → add, then **Manual Deploy → Clear build cache & deploy** |
+| `auth/unauthorized-domain`                   | Step 7                                                                                                     |
+| "Missing or insufficient permissions"        | Step 4 — rules not published                                                                               |
+| "AI reading is not switched on"              | `GEMINI_API_KEY` missing or wrong in Render → Environment                                                  |
+| "Too many requests"                          | Gemini free limit or 40 AI reads/hour per person — wait, or raise `AI_LIMIT_PER_HOUR` in Render            |
+| Changed a `VITE_…` value but nothing changed | These are baked in at build time — redeploy after changing them                                            |
+| Voice button hears nothing                   | Use Chrome on Android; on iPhone type the note instead                                                     |
+| "Try Demo" errors                            | Step 2 — enable Anonymous                                                                                  |

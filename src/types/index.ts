@@ -1,3 +1,8 @@
+import type { FieldValue, Timestamp } from 'firebase/firestore';
+
+/** Firestore server timestamps arrive as Timestamp; pending writes carry a FieldValue; absent before first sync. */
+export type FirestoreTime = Timestamp | FieldValue | null;
+
 export type Role = 'owner' | 'editor' | 'contributor' | 'giftDesk' | 'viewer';
 export type Side = 'bride' | 'groom' | 'common';
 
@@ -6,11 +11,11 @@ export type PaymentType = 'full' | 'advance' | 'balance';
 
 export interface AuditFields {
   createdBy: string;
-  createdAt?: any;
+  createdAt?: FirestoreTime;
   updatedBy?: string;
-  updatedAt?: any;
+  updatedAt?: FirestoreTime;
   deleted: boolean;
-  deletedAt?: any;
+  deletedAt?: FirestoreTime;
   deletedBy?: string;
 }
 
@@ -22,7 +27,7 @@ export interface UserProfile {
   photoURL?: string;
   weddingIds: string[];
   lastWeddingId?: string;
-  createdAt?: any;
+  createdAt?: FirestoreTime;
 }
 
 export interface WeddingCategory {
@@ -49,8 +54,8 @@ export interface Wedding {
   categories: WeddingCategory[];
   status: 'active' | 'archived';
   plan: 'free' | 'premium';
-  createdAt?: any;
-  updatedAt?: any;
+  createdAt?: FirestoreTime;
+  updatedAt?: FirestoreTime;
 }
 
 export interface Member {
@@ -61,7 +66,7 @@ export interface Member {
   side: Side;
   inviteCode?: string;
   removed: boolean;
-  joinedAt?: any;
+  joinedAt?: FirestoreTime;
 }
 
 export interface Invite {
@@ -72,13 +77,14 @@ export interface Invite {
   side: Side;
   createdBy: string;
   createdByName: string;
-  expiresAt: any;
+  expiresAt: FirestoreTime;
   revoked: boolean;
 }
 
 export interface WeddingEvent extends AuditFields {
   id: string;
-  type: 'engagement' | 'haldi' | 'mehendi' | 'sangeet' | 'wedding' | 'reception' | 'vratham' | 'other';
+  type:
+    'engagement' | 'haldi' | 'mehendi' | 'sangeet' | 'wedding' | 'reception' | 'vratham' | 'other';
   name: string;
   date?: string;
   startTime?: string;
@@ -159,5 +165,5 @@ export interface Attachment {
   width?: number;
   height?: number;
   createdBy: string;
-  createdAt?: any;
+  createdAt?: FirestoreTime;
 }

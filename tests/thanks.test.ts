@@ -21,13 +21,23 @@ describe('thank-you message helpers', () => {
   });
 
   it('builds a WhatsApp link, adding 91 to 10-digit numbers', () => {
-    expect(whatsappLink('hi there', '98480 11223')).toBe('https://wa.me/919848011223?text=hi%20there');
+    expect(whatsappLink('hi there', '98480 11223')).toBe(
+      'https://wa.me/919848011223?text=hi%20there'
+    );
     expect(whatsappLink('hi')).toBe('https://wa.me/?text=hi');
   });
 });
 
 describe('thanks request on the server', () => {
-  const good = { kind: 'thanks', giverName: 'Ramesh', relation: 'mama', town: 'Guntur', amountRupees: 5000, hostNames: 'A & D', language: 'te' };
+  const good = {
+    kind: 'thanks',
+    giverName: 'Ramesh',
+    relation: 'mama',
+    town: 'Guntur',
+    amountRupees: 5000,
+    hostNames: 'A & D',
+    language: 'te',
+  };
 
   it('accepts a normal request', () => {
     expect(validateReadRequest(good).ok).toBe(true);

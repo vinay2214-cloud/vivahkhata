@@ -75,7 +75,9 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         {/* Header */}
         {title && (
           <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--color-border)]">
-            <h2 id={titleId} className="text-lg font-bold text-[var(--color-text)]">{title}</h2>
+            <h2 id={titleId} className="text-lg font-bold text-[var(--color-text)]">
+              {title}
+            </h2>
             <IconButton
               aria-label="Close"
               size="sm"

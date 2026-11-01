@@ -1,18 +1,7 @@
+import { errorMessage } from '../lib/errors';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Calendar,
-  Users,
-  Sparkles,
-  Settings,
-  Plus,
-  MapPin,
-  Clock,
-  Trash2,
-  Database,
-  CheckCircle2,
-  Globe,
-} from 'lucide-react';
+import { Calendar, Users, Sparkles, Plus, Database, Globe } from 'lucide-react';
 import { useWedding } from '../context/WeddingContext';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
@@ -27,12 +16,9 @@ interface MoreMenuProps {
   onOpenMembers: () => void;
 }
 
-export const MoreMenu: React.FC<MoreMenuProps> = ({
-  onOpenEventModal,
-  onOpenMembers,
-}) => {
+export const MoreMenu: React.FC<MoreMenuProps> = ({ onOpenEventModal, onOpenMembers }) => {
   const { t, i18n } = useTranslation();
-  const { weddingId, wedding, events, expenses, vendors, gifts, showToast } = useWedding();
+  const { weddingId, events, expenses, vendors, gifts, showToast } = useWedding();
   const alreadyHasData = expenses.length > 0 || vendors.length > 0 || gifts.length > 0;
   const { user } = useAuth();
   const [seeding, setSeeding] = useState(false);
@@ -46,8 +32,8 @@ export const MoreMenu: React.FC<MoreMenuProps> = ({
     try {
       await seedDemoWedding(weddingId, user.uid);
       showToast('Demo data loaded successfully! Check Dashboard and Money.');
-    } catch (err: any) {
-      showToast(err.message || 'Failed to seed demo data');
+    } catch (err) {
+      showToast(errorMessage(err, 'Failed to seed demo data'));
     } finally {
       setSeeding(false);
     }
@@ -88,9 +74,7 @@ export const MoreMenu: React.FC<MoreMenuProps> = ({
                 className="pt-3 first:pt-0 flex items-center justify-between gap-3 hover:bg-[var(--color-surface-2)] p-2 rounded-xl transition-colors cursor-pointer"
               >
                 <div>
-                  <h4 className="font-bold text-sm text-[var(--color-text)]">
-                    {ev.name}
-                  </h4>
+                  <h4 className="font-bold text-sm text-[var(--color-text)]">{ev.name}</h4>
                   <p className="text-xs text-[var(--color-text-muted)] mt-0.5 flex items-center gap-2">
                     {ev.date && <span>{formatDate(ev.date)}</span>}
                     {ev.startTime && <span>• {ev.startTime}</span>}
@@ -122,9 +106,7 @@ export const MoreMenu: React.FC<MoreMenuProps> = ({
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-bold text-sm text-[var(--color-text)]">
-              {t('members.title')}
-            </h3>
+            <h3 className="font-bold text-sm text-[var(--color-text)]">{t('members.title')}</h3>
             <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
               Manage family access & WhatsApp invite links
             </p>
@@ -140,11 +122,10 @@ export const MoreMenu: React.FC<MoreMenuProps> = ({
             <Globe className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-bold text-sm text-[var(--color-text)]">
-              Language (భాష)
-            </h3>
+            <h3 className="font-bold text-sm text-[var(--color-text)]">Language (భాష)</h3>
             <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
-              Current: {LANGUAGE_LABEL[currentLang]} (tap to switch to {LANGUAGE_LABEL[nextLanguage(currentLang)]})
+              Current: {LANGUAGE_LABEL[currentLang]} (tap to switch to{' '}
+              {LANGUAGE_LABEL[nextLanguage(currentLang)]})
             </p>
           </div>
         </div>
@@ -152,27 +133,30 @@ export const MoreMenu: React.FC<MoreMenuProps> = ({
 
       {/* Demo data seeder — only in Demo mode or local development, never on a real family wedding */}
       {(user?.isAnonymous || import.meta.env.DEV) && (
-      <div className="p-5 rounded-2xl bg-[var(--color-surface-2)] border border-[var(--color-border)] shadow-xs flex flex-col gap-3">
-        <div className="flex items-center gap-2 text-[var(--color-primary)]">
-          <Database className="w-5 h-5" />
-          <h3 className="font-bold text-sm uppercase tracking-wider">
-            Reviewer / Pilot Demo Data
-          </h3>
+        <div className="p-5 rounded-2xl bg-[var(--color-surface-2)] border border-[var(--color-border)] shadow-xs flex flex-col gap-3">
+          <div className="flex items-center gap-2 text-[var(--color-primary)]">
+            <Database className="w-5 h-5" />
+            <h3 className="font-bold text-sm uppercase tracking-wider">
+              Reviewer / Pilot Demo Data
+            </h3>
+          </div>
+          <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
+            Instantly populate this wedding ledger with realistic Indian wedding expenses, vendors
+            with payment schedules, and cash/gold gift records for testing and demonstration.
+          </p>
+          <Button
+            variant="outline"
+            size="md"
+            loading={seeding}
+            disabled={alreadyHasData}
+            onClick={handleSeedDemoData}
+            icon={<Sparkles className="w-4 h-4 text-[var(--color-accent)]" />}
+          >
+            {alreadyHasData
+              ? 'Sample data is already loaded'
+              : 'Load Wedding Demo Data (Catering, Decor, Gifts)'}
+          </Button>
         </div>
-        <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
-          Instantly populate this wedding ledger with realistic Indian wedding expenses, vendors with payment schedules, and cash/gold gift records for testing and demonstration.
-        </p>
-        <Button
-          variant="outline"
-          size="md"
-          loading={seeding}
-          disabled={alreadyHasData}
-          onClick={handleSeedDemoData}
-          icon={<Sparkles className="w-4 h-4 text-[var(--color-accent)]" />}
-        >
-          {alreadyHasData ? 'Sample data is already loaded' : 'Load Wedding Demo Data (Catering, Decor, Gifts)'}
-        </Button>
-      </div>
       )}
     </div>
   );

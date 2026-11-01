@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { buildContext, cleanAmount, cleanDate, matchByName, toDraft, type AIContext, type RawResult } from '../src/lib/aiDraft';
+import {
+  buildContext,
+  cleanAmount,
+  cleanDate,
+  matchByName,
+  toDraft,
+  type AIContext,
+  type RawResult,
+} from '../src/lib/aiDraft';
 import type { Member, Vendor, WeddingEvent } from '../src/types';
 
 const ctx: AIContext = {
@@ -9,14 +17,49 @@ const ctx: AIContext = {
     { id: 'secret', label: 'Hidden', icon: 'x', hidden: true },
   ],
   vendors: [
-    { id: 'v1', name: 'Sri Lakshmi Caterers', categoryId: 'catering', schedule: [], createdBy: 'u', deleted: false } as Vendor,
-    { id: 'v9', name: 'Old Vendor', categoryId: 'misc', schedule: [], createdBy: 'u', deleted: true } as Vendor,
+    {
+      id: 'v1',
+      name: 'Sri Lakshmi Caterers',
+      categoryId: 'catering',
+      schedule: [],
+      createdBy: 'u',
+      deleted: false,
+    } as Vendor,
+    {
+      id: 'v9',
+      name: 'Old Vendor',
+      categoryId: 'misc',
+      schedule: [],
+      createdBy: 'u',
+      deleted: true,
+    } as Vendor,
   ],
   members: [
-    { uid: 'u1', displayName: 'Kiran Kumar', role: 'editor', side: 'bride', removed: false } as Member,
-    { uid: 'u2', displayName: 'Removed Person', role: 'viewer', side: 'bride', removed: true } as Member,
+    {
+      uid: 'u1',
+      displayName: 'Kiran Kumar',
+      role: 'editor',
+      side: 'bride',
+      removed: false,
+    } as Member,
+    {
+      uid: 'u2',
+      displayName: 'Removed Person',
+      role: 'viewer',
+      side: 'bride',
+      removed: true,
+    } as Member,
   ],
-  events: [{ id: 'e1', name: 'Mehendi', type: 'mehendi', order: 1, createdBy: 'u', deleted: false } as WeddingEvent],
+  events: [
+    {
+      id: 'e1',
+      name: 'Mehendi',
+      type: 'mehendi',
+      order: 1,
+      createdBy: 'u',
+      deleted: false,
+    } as WeddingEvent,
+  ],
   speakerName: 'Lakshmi',
 };
 
@@ -59,10 +102,25 @@ describe('AI context sent to Gemini', () => {
 describe('turning Gemini output into a safe draft', () => {
   it('maps spoken names to real vendor, member and event records', () => {
     const d = toDraft(
-      raw({ amountRupees: 40000, categoryId: 'catering', vendorName: 'lakshmi caterers', paidByName: 'kiran', eventName: 'mehendi', mode: 'cash', type: 'advance' }),
+      raw({
+        amountRupees: 40000,
+        categoryId: 'catering',
+        vendorName: 'lakshmi caterers',
+        paidByName: 'kiran',
+        eventName: 'mehendi',
+        mode: 'cash',
+        type: 'advance',
+      }),
       ctx
     );
-    expect(d.expense).toMatchObject({ vendorId: 'v1', vendorName: 'Sri Lakshmi Caterers', paidByUid: 'u1', eventId: 'e1', mode: 'cash', type: 'advance' });
+    expect(d.expense).toMatchObject({
+      vendorId: 'v1',
+      vendorName: 'Sri Lakshmi Caterers',
+      paidByUid: 'u1',
+      eventId: 'e1',
+      mode: 'cash',
+      type: 'advance',
+    });
     expect(d.confidence?.['expense.amountRupees']).toBe('high');
   });
 
@@ -72,7 +130,10 @@ describe('turning Gemini output into a safe draft', () => {
   });
 
   it('rejects categories, modes and types that do not exist', () => {
-    const d = toDraft(raw({ amountRupees: 100, categoryId: 'secret', mode: 'bitcoin', type: 'loan' }), ctx);
+    const d = toDraft(
+      raw({ amountRupees: 100, categoryId: 'secret', mode: 'bitcoin', type: 'loan' }),
+      ctx
+    );
     expect(d.expense?.categoryId).toBe('misc');
     expect(d.confidence?.['expense.categoryId']).toBe('low');
     expect(d.expense?.mode).toBeNull();
@@ -87,20 +148,36 @@ describe('turning Gemini output into a safe draft', () => {
   });
 
   it('strips spaces from UPI references for duplicate checks', () => {
-    expect(toDraft(raw({ amountRupees: 10, upiRef: 'T2610 1903 1204' }), ctx).expense?.upiRef).toBe('T261019031204');
+    expect(toDraft(raw({ amountRupees: 10, upiRef: 'T2610 1903 1204' }), ctx).expense?.upiRef).toBe(
+      'T261019031204'
+    );
   });
 
   it('builds gift drafts and ignores silly gold weights', () => {
-    const d = toDraft(raw({ kind: 'gift', giverName: ' Ramesh Garu ', town: 'Guntur', amountRupees: 5000, goldGrams: 99999 }), ctx);
+    const d = toDraft(
+      raw({
+        kind: 'gift',
+        giverName: ' Ramesh Garu ',
+        town: 'Guntur',
+        amountRupees: 5000,
+        goldGrams: 99999,
+      }),
+      ctx
+    );
     expect(d.kind).toBe('gift');
-    expect(d.gift).toMatchObject({ giverName: 'Ramesh Garu', town: 'Guntur', cashRupees: 5000, goldGrams: null });
+    expect(d.gift).toMatchObject({
+      giverName: 'Ramesh Garu',
+      town: 'Guntur',
+      cashRupees: 5000,
+      goldGrams: null,
+    });
   });
 
   it('turns unknown readings into a friendly "type it instead" message', () => {
     expect(toDraft(raw({ kind: 'unknown' }), ctx).warnings?.[0]).toMatch(/type it/i);
-    expect(toDraft(raw({ kind: 'unknown', warnings: ["This app doesn't record dowry."] }), ctx).warnings).toEqual([
-      "This app doesn't record dowry.",
-    ]);
+    expect(
+      toDraft(raw({ kind: 'unknown', warnings: ["This app doesn't record dowry."] }), ctx).warnings
+    ).toEqual(["This app doesn't record dowry."]);
   });
 });
 

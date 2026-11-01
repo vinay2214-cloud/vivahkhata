@@ -1,6 +1,7 @@
+import { errorMessage } from '../lib/errors';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Users, UserPlus, Share2, Copy, Check, Shield, Trash2, KeyRound } from 'lucide-react';
+import { Users, UserPlus, Share2, Copy, Check, Trash2, KeyRound } from 'lucide-react';
 import { useWedding } from '../context/WeddingContext';
 import { useAuth } from '../context/AuthContext';
 import { Avatar } from '../components/ui/Avatar';
@@ -8,7 +9,7 @@ import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { BottomSheet } from '../components/ui/BottomSheet';
 import { createInvite } from '../services/invites';
-import { removeMember, updateMemberRole } from '../services/members';
+import { removeMember } from '../services/members';
 import { Role, Side } from '../types';
 
 export const Members: React.FC = () => {
@@ -41,8 +42,8 @@ export const Members: React.FC = () => {
       );
       setGeneratedInvite({ code: invite.code });
       showToast('Invite code generated!');
-    } catch (err: any) {
-      showToast(err.message || 'Failed to create invite');
+    } catch (err) {
+      showToast(errorMessage(err, 'Failed to create invite'));
     } finally {
       setLoading(false);
     }
@@ -71,8 +72,8 @@ Open app: ${window.location.origin}/join/${generatedInvite?.code}`;
       try {
         await removeMember(weddingId, targetUid);
         showToast(`${memberName} removed from ledger`);
-      } catch (err: any) {
-        showToast(err.message || 'Failed to remove member');
+      } catch (err) {
+        showToast(errorMessage(err, 'Failed to remove member'));
       }
     }
   };
@@ -277,7 +278,8 @@ Open app: ${window.location.origin}/join/${generatedInvite?.code}`;
                 {generatedInvite.code}
               </span>
               <span className="text-xs text-[var(--color-text-muted)]">
-                Role: <span className="font-bold capitalize">{inviteRole}</span> • Side: <span className="font-bold capitalize">{inviteSide}</span>
+                Role: <span className="font-bold capitalize">{inviteRole}</span> • Side:{' '}
+                <span className="font-bold capitalize">{inviteSide}</span>
               </span>
             </div>
 
@@ -298,7 +300,13 @@ Open app: ${window.location.origin}/join/${generatedInvite?.code}`;
               size="md"
               fullWidth
               onClick={handleCopy}
-              icon={copied ? <Check className="w-4 h-4 text-[var(--color-success)]" /> : <Copy className="w-4 h-4" />}
+              icon={
+                copied ? (
+                  <Check className="w-4 h-4 text-[var(--color-success)]" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )
+              }
             >
               {copied ? 'Copied to Clipboard ✓' : t('members.copy_link')}
             </Button>

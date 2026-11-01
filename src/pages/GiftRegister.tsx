@@ -1,10 +1,10 @@
+import { timeToDate } from '../lib/errors';
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Gift as GiftIcon, Download, Sparkles, Search, ArrowRight, Gem } from 'lucide-react';
+import { Gift as GiftIcon, Download, ArrowRight, Gem } from 'lucide-react';
 import { useWedding } from '../context/WeddingContext';
 import { AmountText } from '../components/ui/AmountText';
 import { SearchBar } from '../components/ui/SearchBar';
-import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
 import { formatGoldMg } from '../lib/money';
 import { Gift } from '../types';
@@ -16,15 +16,13 @@ interface GiftRegisterProps {
   onOpenGiftSheet: (gift?: Gift) => void;
 }
 
-export const GiftRegister: React.FC<GiftRegisterProps> = ({
-  onOpenGiftDesk,
-  onOpenGiftSheet,
-}) => {
+export const GiftRegister: React.FC<GiftRegisterProps> = ({ onOpenGiftDesk, onOpenGiftSheet }) => {
   const { t } = useTranslation();
   const { wedding, gifts, totals, events } = useWedding();
   const [searchQuery, setSearchQuery] = useState('');
   const [thankGift, setThankGift] = useState<Gift | null>(null);
-  const [selectedSideFilter, setSelectedSideFilter] = useState<'all' | 'bride' | 'groom' | 'common'>('all');
+  type SideFilter = 'all' | 'bride' | 'groom' | 'common';
+  const [selectedSideFilter, setSelectedSideFilter] = useState<SideFilter>('all');
 
   const filteredGifts = useMemo(() => {
     return gifts.filter((g) => {
@@ -47,7 +45,21 @@ export const GiftRegister: React.FC<GiftRegisterProps> = ({
 
   // CSV Export with UTF-8 BOM so Telugu characters display properly in Excel & Google Sheets
   const handleExportCSV = () => {
-    const headers = ['Envelope No', 'Giver Name', 'Relation', 'Town', 'Side', 'Event', 'Cash (Rupees)', 'Cash (Paise)', 'Gold (Grams)', 'Gold Description', 'Other Items', 'Note', 'Date'];
+    const headers = [
+      'Envelope No',
+      'Giver Name',
+      'Relation',
+      'Town',
+      'Side',
+      'Event',
+      'Cash (Rupees)',
+      'Cash (Paise)',
+      'Gold (Grams)',
+      'Gold Description',
+      'Other Items',
+      'Note',
+      'Date',
+    ];
     const rows = gifts.map((g) => {
       const eventName = events.find((e) => e.id === g.eventId)?.name || 'General';
       return [
@@ -63,7 +75,7 @@ export const GiftRegister: React.FC<GiftRegisterProps> = ({
         `"${(g.goldDescription || '').replace(/"/g, '""')}"`,
         `"${(g.items || '').replace(/"/g, '""')}"`,
         `"${(g.note || '').replace(/"/g, '""')}"`,
-        g.createdAt?.toDate ? g.createdAt.toDate().toISOString() : '',
+        timeToDate(g.createdAt)?.toISOString() ?? '',
       ].join(',');
     });
 
@@ -144,17 +156,29 @@ export const GiftRegister: React.FC<GiftRegisterProps> = ({
       </div>
 
       {repeats.length > 0 && (
-        <section className="p-4 rounded-2xl bg-[var(--color-accent-soft)] border border-[#F2B84B]/40" aria-labelledby="repeat-title">
-          <h2 id="repeat-title" className="text-xs font-bold uppercase tracking-wider text-[#8C5D00]">
+        <section
+          className="p-4 rounded-2xl bg-[var(--color-accent-soft)] border border-[#F2B84B]/40"
+          aria-labelledby="repeat-title"
+        >
+          <h2
+            id="repeat-title"
+            className="text-xs font-bold uppercase tracking-wider text-[#8C5D00]"
+          >
             Gave more than once
           </h2>
           <ul className="mt-2 flex flex-col gap-1.5">
             {repeats.slice(0, 5).map((r) => (
               <li key={r.nameKey} className="flex items-center justify-between gap-3 text-sm">
                 <span className="font-semibold text-[var(--color-text)] truncate">
-                  {r.giverName} <span className="text-xs font-normal text-[var(--color-text-muted)]">· {r.count} gifts</span>
+                  {r.giverName}{' '}
+                  <span className="text-xs font-normal text-[var(--color-text-muted)]">
+                    · {r.count} gifts
+                  </span>
                 </span>
-                <AmountText paise={r.totalCashPaise} className="font-bold text-[var(--color-primary)] shrink-0" />
+                <AmountText
+                  paise={r.totalCashPaise}
+                  className="font-bold text-[var(--color-primary)] shrink-0"
+                />
               </li>
             ))}
           </ul>
@@ -171,16 +195,18 @@ export const GiftRegister: React.FC<GiftRegisterProps> = ({
 
         {/* Side filter chips */}
         <div className="flex items-center gap-2">
-          {[
-            { id: 'all', label: 'All Gifts' },
-            { id: 'bride', label: wedding?.sides?.bride?.label || 'Bride Side' },
-            { id: 'groom', label: wedding?.sides?.groom?.label || 'Groom Side' },
-            { id: 'common', label: 'Common' },
-          ].map((chip) => (
+          {(
+            [
+              { id: 'all', label: 'All Gifts' },
+              { id: 'bride', label: wedding?.sides?.bride?.label || 'Bride Side' },
+              { id: 'groom', label: wedding?.sides?.groom?.label || 'Groom Side' },
+              { id: 'common', label: 'Common' },
+            ] as { id: SideFilter; label: string }[]
+          ).map((chip) => (
             <button
               key={chip.id}
               type="button"
-              onClick={() => setSelectedSideFilter(chip.id as any)}
+              onClick={() => setSelectedSideFilter(chip.id)}
               className={`px-3 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer ${
                 selectedSideFilter === chip.id
                   ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)] border-[var(--color-primary)]'

@@ -14,7 +14,8 @@ export const Badge: React.FC<BadgeProps> = ({
   className = '',
 }) => {
   const variantStyles = {
-    neutral: 'bg-[var(--color-surface-2)] text-[var(--color-text)] border border-[var(--color-border)]',
+    neutral:
+      'bg-[var(--color-surface-2)] text-[var(--color-text)] border border-[var(--color-border)]',
     primary: 'bg-[var(--color-primary-soft)] text-[var(--color-primary)] font-semibold',
     accent: 'bg-[var(--color-accent-soft)] text-[#8C5D00] font-semibold',
     success: 'bg-[#E3F4EA] text-[var(--color-success)] font-semibold',

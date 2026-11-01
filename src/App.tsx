@@ -23,13 +23,17 @@ import { ConfirmCard, ParsedAIDraft } from './components/ai/ConfirmCard';
 import { Expense, Vendor, WeddingEvent, Gift } from './types';
 
 function MainApp() {
-  const { user, profile, loading: authLoading } = useAuth();
-  const { weddingId, wedding, loading: weddingLoading } = useWedding();
+  const { user, loading: authLoading } = useAuth();
+  const { weddingId } = useWedding();
 
-  const [currentView, setCurrentView] = useState<'shell' | 'create' | 'gift-desk' | 'members'>('shell');
+  const [currentView, setCurrentView] = useState<'shell' | 'create' | 'gift-desk' | 'members'>(
+    'shell'
+  );
   // Code from an invite link like /join/AB7K2P (kept through sign-in).
   const [pendingInvite, setPendingInvite] = useState<string | null>(() => readPendingInviteCode());
-  const [currentTab, setCurrentTab] = useState<'home' | 'money' | 'gifts' | 'more' | 'gift-desk'>('home');
+  const [currentTab, setCurrentTab] = useState<'home' | 'money' | 'gifts' | 'more' | 'gift-desk'>(
+    'home'
+  );
 
   // Modals state
   const [isExpenseSheetOpen, setIsExpenseSheetOpen] = useState(false);

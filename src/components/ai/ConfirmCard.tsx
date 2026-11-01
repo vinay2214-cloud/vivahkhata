@@ -1,5 +1,6 @@
+import { errorMessage } from '../../lib/errors';
 import React, { useState } from 'react';
-import { Check, AlertTriangle, ArrowRight, X } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { BottomSheet } from '../ui/BottomSheet';
 import { Button } from '../ui/Button';
 import { AmountInput } from '../ui/AmountInput';
@@ -49,18 +50,13 @@ interface ConfirmCardProps {
   draft: ParsedAIDraft | null;
 }
 
-export const ConfirmCard: React.FC<ConfirmCardProps> = ({
-  isOpen,
-  onClose,
-  draft,
-}) => {
-  const { weddingId, wedding, members, vendors, events, expenses, showToast } = useWedding();
+export const ConfirmCard: React.FC<ConfirmCardProps> = ({ isOpen, onClose, draft }) => {
+  const { weddingId, wedding, expenses, showToast } = useWedding();
   const { user, profile } = useAuth();
 
   const [kind, setKind] = useState<'expense' | 'gift'>('expense');
   const [amountPaise, setAmountPaise] = useState<number>(0);
   const [categoryId, setCategoryId] = useState<string>('catering');
-  const [vendorName, setVendorName] = useState<string>('');
   const [vendorId, setVendorId] = useState<string>('');
   const [paidByName, setPaidByName] = useState<string>('');
   const [paidByUid, setPaidByUid] = useState<string>('');
@@ -92,11 +88,8 @@ export const ConfirmCard: React.FC<ConfirmCardProps> = ({
       setKind('expense');
       setAmountPaise(Math.round((draft.expense?.amountRupees || 0) * 100));
       setCategoryId(draft.expense?.categoryId || 'catering');
-      setVendorName(draft.expense?.vendorName || '');
       setVendorId(draft.expense?.vendorId || '');
-      setPaidByName(
-        draft.expense?.paidByName || profile?.displayName || user?.displayName || 'Me'
-      );
+      setPaidByName(draft.expense?.paidByName || profile?.displayName || user?.displayName || 'Me');
       setPaidByUid(draft.expense?.paidByUid || user?.uid || '');
       setMode(draft.expense?.mode || 'upi');
       setType(draft.expense?.type || 'full');
@@ -141,7 +134,8 @@ export const ConfirmCard: React.FC<ConfirmCardProps> = ({
           side: 'common' as Side,
           note: note ? `${note} (AI transcribed)` : '(AI transcribed)',
           upiRef,
-          source: (draft.imageThumbnail ? (upiRef ? 'upi' : 'receipt') : 'voice') as 'upi' | 'receipt' | 'voice',
+          source: (draft.imageThumbnail ? (upiRef ? 'upi' : 'receipt') : 'voice') as
+            'upi' | 'receipt' | 'voice',
         };
         await createExpense(weddingId, input, user.uid);
         showToast('Expense confirmed & saved to ledger', undefined, 'Undo');
@@ -161,8 +155,8 @@ export const ConfirmCard: React.FC<ConfirmCardProps> = ({
         showToast(`Gift from ${giverName.trim()} confirmed & saved`, undefined, 'Undo');
       }
       onClose();
-    } catch (err: any) {
-      showToast(err.message || 'Failed to save');
+    } catch (err) {
+      showToast(errorMessage(err, 'Failed to save'));
     } finally {
       setLoading(false);
     }
@@ -176,8 +170,8 @@ export const ConfirmCard: React.FC<ConfirmCardProps> = ({
             <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
             <p>
               This payment looks already recorded (same UPI reference, ₹
-              {(duplicateExpense.amountPaise / 100).toLocaleString('en-IN')} on {duplicateExpense.date}).
-              Save again only if it is a different payment.
+              {(duplicateExpense.amountPaise / 100).toLocaleString('en-IN')} on{' '}
+              {duplicateExpense.date}). Save again only if it is a different payment.
             </p>
           </div>
         )}
@@ -370,12 +364,7 @@ export const ConfirmCard: React.FC<ConfirmCardProps> = ({
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3 pt-3">
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            onClick={onClose}
-          >
+          <Button type="button" variant="outline" size="lg" onClick={onClose}>
             Discard
           </Button>
           <Button

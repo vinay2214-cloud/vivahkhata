@@ -17,12 +17,7 @@ export interface AvatarProps {
   className?: string;
 }
 
-export const Avatar: React.FC<AvatarProps> = ({
-  name,
-  photoURL,
-  size = 'md',
-  className = '',
-}) => {
+export const Avatar: React.FC<AvatarProps> = ({ name, photoURL, size = 'md', className = '' }) => {
   const sizeMap = {
     sm: 'w-8 h-8 text-xs',
     md: 'w-10 h-10 text-sm',

@@ -36,9 +36,7 @@ export const AmountInput: React.FC<AmountInputProps> = ({
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
       {label && (
-        <label className="text-sm font-medium text-[var(--color-text-muted)]">
-          {label}
-        </label>
+        <label className="text-sm font-medium text-[var(--color-text-muted)]">{label}</label>
       )}
 
       <div className="relative flex items-center">

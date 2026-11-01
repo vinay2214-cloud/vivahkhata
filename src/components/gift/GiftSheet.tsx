@@ -1,3 +1,4 @@
+import { errorMessage } from '../../lib/errors';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BottomSheet } from '../ui/BottomSheet';
@@ -14,11 +15,7 @@ interface GiftSheetProps {
   giftToEdit?: Gift | null;
 }
 
-export const GiftSheet: React.FC<GiftSheetProps> = ({
-  isOpen,
-  onClose,
-  giftToEdit,
-}) => {
+export const GiftSheet: React.FC<GiftSheetProps> = ({ isOpen, onClose, giftToEdit }) => {
   const { t } = useTranslation();
   const { weddingId, wedding, gifts, events, showToast } = useWedding();
   const { user } = useAuth();
@@ -110,8 +107,8 @@ export const GiftSheet: React.FC<GiftSheetProps> = ({
         showToast(`Gift from ${giverName} saved`, undefined, 'Undo');
       }
       onClose();
-    } catch (err: any) {
-      showToast(err.message || 'Failed to save gift');
+    } catch (err) {
+      showToast(errorMessage(err, 'Failed to save gift'));
     } finally {
       setLoading(false);
     }
@@ -124,8 +121,8 @@ export const GiftSheet: React.FC<GiftSheetProps> = ({
         await softDeleteGift(weddingId, giftToEdit.id, user.uid);
         showToast('Gift deleted', undefined, 'Undo');
         onClose();
-      } catch (err: any) {
-        showToast(err.message || 'Failed to delete');
+      } catch (err) {
+        showToast(errorMessage(err, 'Failed to delete'));
       }
     }
   };

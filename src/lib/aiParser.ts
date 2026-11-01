@@ -15,20 +15,54 @@ const UNIT_WORDS: Array<{ pattern: RegExp; multiplier: number }> = [
 
 // Telugu / Hindi / English number words (common ones only).
 const NUMBER_WORDS: Record<string, number> = {
-  oka: 1, okati: 1, ek: 1, one: 1,
-  rendu: 2, do: 2, two: 2,
-  moodu: 3, mudu: 3, teen: 3, three: 3,
-  nalugu: 4, char: 4, four: 4,
-  aidu: 5, ayidu: 5, paanch: 5, panch: 5, five: 5,
-  aaru: 6, chhe: 6, six: 6,
-  edu: 7, saat: 7, seven: 7,
-  enimidi: 8, aath: 8, eight: 8,
-  tommidi: 9, nau: 9, nine: 9,
-  padi: 10, das: 10, ten: 10,
-  iravai: 20, bees: 20, twenty: 20,
-  muppai: 30, tees: 30, thirty: 30,
-  nalabhai: 40, nalabai: 40, chalees: 40, forty: 40,
-  yabhai: 50, yaabhai: 50, pachaas: 50, fifty: 50,
+  oka: 1,
+  okati: 1,
+  ek: 1,
+  one: 1,
+  rendu: 2,
+  do: 2,
+  two: 2,
+  moodu: 3,
+  mudu: 3,
+  teen: 3,
+  three: 3,
+  nalugu: 4,
+  char: 4,
+  four: 4,
+  aidu: 5,
+  ayidu: 5,
+  paanch: 5,
+  panch: 5,
+  five: 5,
+  aaru: 6,
+  chhe: 6,
+  six: 6,
+  edu: 7,
+  saat: 7,
+  seven: 7,
+  enimidi: 8,
+  aath: 8,
+  eight: 8,
+  tommidi: 9,
+  nau: 9,
+  nine: 9,
+  padi: 10,
+  das: 10,
+  ten: 10,
+  iravai: 20,
+  bees: 20,
+  twenty: 20,
+  muppai: 30,
+  tees: 30,
+  thirty: 30,
+  nalabhai: 40,
+  nalabai: 40,
+  chalees: 40,
+  forty: 40,
+  yabhai: 50,
+  yaabhai: 50,
+  pachaas: 50,
+  fifty: 50,
 };
 
 function extractAmountRupees(lower: string): number | null {
@@ -73,12 +107,11 @@ export function parseSpokenTextToDraft(
   }
 
   const amountRupees = extractAmountRupees(lower);
-  const warnings: string[] = [
-    'Offline reading: please check every field before saving.',
-  ];
+  const warnings: string[] = ['Offline reading: please check every field before saving.'];
   if (amountRupees === null) warnings.push("Couldn't catch the amount. Please type it.");
 
-  const isGift = /(icharu|ichindi|ichadu|chadivincharu|chadivimpu|gave us|shagun|\bmoi\b|gift ga)/.test(lower);
+  const isGift =
+    /(icharu|ichindi|ichadu|chadivincharu|chadivimpu|gave us|shagun|\bmoi\b|gift ga)/.test(lower);
 
   if (isGift) {
     const hasGold = /(bangaram|gold)/.test(lower);

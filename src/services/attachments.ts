@@ -1,10 +1,4 @@
-import {
-  collection,
-  doc,
-  addDoc,
-  getDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
+import { collection, doc, addDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import imageCompression from 'browser-image-compression';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Attachment } from '../types';

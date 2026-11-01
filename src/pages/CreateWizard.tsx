@@ -1,6 +1,7 @@
+import { errorMessage } from '../lib/errors';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ArrowRight, Check, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { AmountInput } from '../components/ui/AmountInput';
 import { useAuth } from '../context/AuthContext';
@@ -16,10 +17,7 @@ interface CreateWizardProps {
   onSuccess: (wid: string) => void;
 }
 
-export const CreateWizard: React.FC<CreateWizardProps> = ({
-  onBack,
-  onSuccess,
-}) => {
+export const CreateWizard: React.FC<CreateWizardProps> = ({ onBack, onSuccess }) => {
   const { t } = useTranslation();
   const { user, profile } = useAuth();
   const { selectWedding, showToast } = useWedding();
@@ -79,8 +77,8 @@ export const CreateWizard: React.FC<CreateWizardProps> = ({
       selectWedding(wid);
       showToast('Wedding ledger created successfully! 🎉');
       onSuccess(wid);
-    } catch (err: any) {
-      showToast(err.message || 'Failed to create wedding');
+    } catch (err) {
+      showToast(errorMessage(err, 'Failed to create wedding'));
     } finally {
       setLoading(false);
     }
@@ -256,12 +254,8 @@ export const CreateWizard: React.FC<CreateWizardProps> = ({
                     }`}
                   >
                     <div>
-                      <h4 className="font-bold text-base text-[var(--color-text)]">
-                        {item.label}
-                      </h4>
-                      <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
-                        {item.desc}
-                      </p>
+                      <h4 className="font-bold text-base text-[var(--color-text)]">{item.label}</h4>
+                      <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{item.desc}</p>
                     </div>
                     {isSelected && (
                       <div className="w-6 h-6 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center shrink-0">
@@ -299,9 +293,7 @@ export const CreateWizard: React.FC<CreateWizardProps> = ({
                         : 'bg-[var(--color-surface)] border-[var(--color-border)]'
                     }`}
                   >
-                    <span className="font-bold text-sm text-[var(--color-text)]">
-                      {tmpl.name}
-                    </span>
+                    <span className="font-bold text-sm text-[var(--color-text)]">{tmpl.name}</span>
                     <div
                       className={`w-5 h-5 rounded-md flex items-center justify-center border ${
                         isSelected
@@ -367,13 +359,7 @@ export const CreateWizard: React.FC<CreateWizardProps> = ({
             <ArrowRight className="w-5 h-5" />
           </Button>
         ) : (
-          <Button
-            variant="primary"
-            size="lg"
-            fullWidth
-            loading={loading}
-            onClick={handleFinish}
-          >
+          <Button variant="primary" size="lg" fullWidth loading={loading} onClick={handleFinish}>
             {t('wizard.create')}
           </Button>
         )}

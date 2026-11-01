@@ -87,11 +87,23 @@ export const ThankYouSheet: React.FC<Props> = ({ gift, hostNames, onClose }) => 
           />
         </label>
 
-        <p role="status" aria-live="polite" className="text-xs text-[var(--color-text-muted)] min-h-4">
-          {notice || 'You can edit the message before sending. The gift amount is never written in it.'}
+        <p
+          role="status"
+          aria-live="polite"
+          className="text-xs text-[var(--color-text-muted)] min-h-4"
+        >
+          {notice ||
+            'You can edit the message before sending. The gift amount is never written in it.'}
         </p>
 
-        <Button variant="outline" size="lg" fullWidth loading={loading} onClick={write} icon={<Sparkles className="w-4 h-4 text-[var(--color-accent)]" />}>
+        <Button
+          variant="outline"
+          size="lg"
+          fullWidth
+          loading={loading}
+          onClick={write}
+          icon={<Sparkles className="w-4 h-4 text-[var(--color-accent)]" />}
+        >
           Write with Gemini
         </Button>
         <a

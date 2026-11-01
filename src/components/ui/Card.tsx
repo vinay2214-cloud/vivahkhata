@@ -73,22 +73,15 @@ export const StatCard: React.FC<StatCardProps> = ({
       </div>
 
       <div className="flex items-baseline gap-1.5">
-        <AmountText paise={paise} className="text-xl sm:text-2xl font-bold text-[var(--color-text)]" />
+        <AmountText
+          paise={paise}
+          className="text-xl sm:text-2xl font-bold text-[var(--color-text)]"
+        />
       </div>
 
-      {progress && (
-        <ProgressBar
-          value={progress.current}
-          max={progress.total}
-          className="mt-1"
-        />
-      )}
+      {progress && <ProgressBar value={progress.current} max={progress.total} className="mt-1" />}
 
-      {subText && (
-        <p className="text-xs text-[var(--color-text-muted)] truncate">
-          {subText}
-        </p>
-      )}
+      {subText && <p className="text-xs text-[var(--color-text-muted)] truncate">{subText}</p>}
     </div>
   );
 };

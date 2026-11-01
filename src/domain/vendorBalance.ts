@@ -14,18 +14,14 @@ export interface VendorFinancialSummary {
   >;
 }
 
-export function computeVendorBalance(
-  vendor: Vendor,
-  expenses: Expense[]
-): VendorFinancialSummary {
-  const activeExpenses = expenses.filter(
-    (e) => !e.deleted && e.vendorId === vendor.id
-  );
+export function computeVendorBalance(vendor: Vendor, expenses: Expense[]): VendorFinancialSummary {
+  const activeExpenses = expenses.filter((e) => !e.deleted && e.vendorId === vendor.id);
 
   const agreedPaise = vendor.agreedPaise || vendor.quotedPaise || 0;
   const paidPaise = activeExpenses.reduce((sum, e) => sum + e.amountPaise, 0);
   const balancePaise = Math.max(0, agreedPaise - paidPaise);
-  const progressPercent = agreedPaise > 0 ? Math.min(100, Math.round((paidPaise / agreedPaise) * 100)) : 0;
+  const progressPercent =
+    agreedPaise > 0 ? Math.min(100, Math.round((paidPaise / agreedPaise) * 100)) : 0;
 
   const today = getTodayDateString();
 

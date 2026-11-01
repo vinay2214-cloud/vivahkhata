@@ -1,19 +1,8 @@
+import { errorMessage } from '../lib/errors';
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Search,
-  Plus,
-  Phone,
-  MessageCircle,
-  FileText,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Filter,
-  IndianRupee,
-} from 'lucide-react';
+import { Plus, Phone, MessageCircle, Clock, CheckCircle } from 'lucide-react';
 import { useWedding } from '../context/WeddingContext';
-import { useAuth } from '../context/AuthContext';
 import { AmountText } from '../components/ui/AmountText';
 import { Badge } from '../components/ui/Badge';
 import { ProgressBar } from '../components/ui/ProgressBar';
@@ -22,14 +11,19 @@ import { EmptyState } from '../components/ui/EmptyState';
 import { Button } from '../components/ui/Button';
 import { formatDate, formatRelativeDay } from '../lib/dates';
 import { computeVendorBalance } from '../domain/vendorBalance';
-import { Expense, Vendor, PaymentType } from '../types';
+import { Expense, Vendor } from '../types';
 import { updateWedding } from '../services/weddings';
 import { toPaise } from '../lib/money';
 
 interface MoneyProps {
   onOpenExpenseSheet: (expense?: Expense) => void;
   onOpenVendorModal: (vendor?: Vendor) => void;
-  onRecordVendorPayment: (vendorId: string, scheduleItemId: string, amountPaise: number, categoryId: string) => void;
+  onRecordVendorPayment: (
+    vendorId: string,
+    scheduleItemId: string,
+    amountPaise: number,
+    categoryId: string
+  ) => void;
 }
 
 export const Money: React.FC<MoneyProps> = ({
@@ -39,12 +33,11 @@ export const Money: React.FC<MoneyProps> = ({
 }) => {
   const { t } = useTranslation();
   const { weddingId, wedding, expenses, vendors, totals, showToast } = useWedding();
-  const { user } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'expenses' | 'vendors' | 'budget'>('expenses');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('all');
-  const [selectedModeFilter, setSelectedModeFilter] = useState<string>('all');
+  const [selectedModeFilter] = useState<string>('all');
 
   // Budget editing state
   const [editingBudgetId, setEditingBudgetId] = useState<string | null>(null);
@@ -100,8 +93,8 @@ export const Money: React.FC<MoneyProps> = ({
       await updateWedding(weddingId, { categoryBudgets });
       showToast('Category budget target updated');
       setEditingBudgetId(null);
-    } catch (err: any) {
-      showToast(err.message || 'Failed to update budget');
+    } catch (err) {
+      showToast(errorMessage(err, 'Failed to update budget'));
     }
   };
 
@@ -176,9 +169,7 @@ export const Money: React.FC<MoneyProps> = ({
                   key={cat.id}
                   type="button"
                   onClick={() =>
-                    setSelectedCategoryFilter(
-                      selectedCategoryFilter === cat.id ? 'all' : cat.id
-                    )
+                    setSelectedCategoryFilter(selectedCategoryFilter === cat.id ? 'all' : cat.id)
                   }
                   className={`px-3 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer shrink-0 ${
                     selectedCategoryFilter === cat.id
@@ -326,7 +317,8 @@ export const Money: React.FC<MoneyProps> = ({
                           )}
                         </div>
                         <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
-                          {category?.label || 'Vendor'} {vendor.contactName && `• ${vendor.contactName}`}
+                          {category?.label || 'Vendor'}{' '}
+                          {vendor.contactName && `• ${vendor.contactName}`}
                         </p>
                       </div>
 
@@ -363,10 +355,7 @@ export const Money: React.FC<MoneyProps> = ({
                           Agreed: <AmountText paise={summary.agreedPaise} />
                         </span>
                       </div>
-                      <ProgressBar
-                        value={summary.paidPaise}
-                        max={summary.agreedPaise}
-                      />
+                      <ProgressBar value={summary.paidPaise} max={summary.agreedPaise} />
                       <div className="text-right text-xs font-bold text-[var(--color-warning)]">
                         Balance due: <AmountText paise={summary.balancePaise} />
                       </div>

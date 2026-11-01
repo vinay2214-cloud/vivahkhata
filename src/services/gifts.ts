@@ -1,12 +1,6 @@
-import {
-  collection,
-  doc,
-  addDoc,
-  updateDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
+import { collection, doc, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { Gift, Side } from '../types';
+import { Side } from '../types';
 
 export interface CreateGiftInput {
   envelopeNo?: number;
@@ -78,7 +72,7 @@ export async function updateGift(
 ): Promise<void> {
   const path = `weddings/${wid}/gifts/${id}`;
 
-  const updatePayload: any = {
+  const updatePayload: Record<string, unknown> = {
     ...input,
     updatedBy: updatedByUid,
     updatedAt: serverTimestamp(),
@@ -96,11 +90,7 @@ export async function updateGift(
   }
 }
 
-export async function softDeleteGift(
-  wid: string,
-  id: string,
-  deletedByUid: string
-): Promise<void> {
+export async function softDeleteGift(wid: string, id: string, deletedByUid: string): Promise<void> {
   const path = `weddings/${wid}/gifts/${id}`;
 
   try {

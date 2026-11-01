@@ -1,19 +1,8 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
-import {
-  doc,
-  collection,
-  onSnapshot,
-} from 'firebase/firestore';
+import { doc, collection, onSnapshot } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { useAuth } from './AuthContext';
-import {
-  Wedding,
-  Member,
-  Expense,
-  Vendor,
-  Gift,
-  WeddingEvent,
-} from '../types';
+import { Wedding, Member, Expense, Vendor, Gift, WeddingEvent } from '../types';
 import { computeWeddingTotals, WeddingTotals } from '../domain/totals';
 import { Toast, ToastMessage } from '../components/ui/Toast';
 
@@ -147,7 +136,7 @@ export const WeddingProvider: React.FC<{
       collection(db, 'weddings', weddingId, 'expenses'),
       (snap) => {
         const list = snap.docs
-          .map((d) => ({ id: d.id, ...d.data() } as Expense))
+          .map((d) => ({ id: d.id, ...d.data() }) as Expense)
           .filter((e) => !e.deleted)
           .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
         setExpenses(list);
@@ -162,7 +151,7 @@ export const WeddingProvider: React.FC<{
       collection(db, 'weddings', weddingId, 'vendors'),
       (snap) => {
         const list = snap.docs
-          .map((d) => ({ id: d.id, ...d.data() } as Vendor))
+          .map((d) => ({ id: d.id, ...d.data() }) as Vendor)
           .filter((v) => !v.deleted);
         setVendors(list);
       },
@@ -176,7 +165,7 @@ export const WeddingProvider: React.FC<{
       collection(db, 'weddings', weddingId, 'gifts'),
       (snap) => {
         const list = snap.docs
-          .map((d) => ({ id: d.id, ...d.data() } as Gift))
+          .map((d) => ({ id: d.id, ...d.data() }) as Gift)
           .filter((g) => !g.deleted);
         setGifts(list);
       },
@@ -190,7 +179,7 @@ export const WeddingProvider: React.FC<{
       collection(db, 'weddings', weddingId, 'events'),
       (snap) => {
         const list = snap.docs
-          .map((d) => ({ id: d.id, ...d.data() } as WeddingEvent))
+          .map((d) => ({ id: d.id, ...d.data() }) as WeddingEvent)
           .filter((e) => !e.deleted)
           .sort((a, b) => (a.order || 0) - (b.order || 0));
         setEvents(list);
@@ -212,12 +201,7 @@ export const WeddingProvider: React.FC<{
   }, [weddingId, user]);
 
   const totals = useMemo(() => {
-    return computeWeddingTotals(
-      expenses,
-      gifts,
-      vendors,
-      wedding?.totalBudgetPaise || 0
-    );
+    return computeWeddingTotals(expenses, gifts, vendors, wedding?.totalBudgetPaise || 0);
   }, [expenses, gifts, vendors, wedding?.totalBudgetPaise]);
 
   const selectWedding = (wid: string) => {

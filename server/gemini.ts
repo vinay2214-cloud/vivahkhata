@@ -56,7 +56,12 @@ export function buildGeminiRequest(req: ReadRequest) {
   if (req.kind === 'voice') {
     return {
       systemInstruction: VOICE_PROMPT,
-      contents: [{ role: 'user', parts: [{ text: `Context: ${req.context}` }, { text: `Spoken note: ${req.text}` }] }],
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: `Context: ${req.context}` }, { text: `Spoken note: ${req.text}` }],
+        },
+      ],
     };
   }
   return {
@@ -64,7 +69,10 @@ export function buildGeminiRequest(req: ReadRequest) {
     contents: [
       {
         role: 'user',
-        parts: [{ text: `Context: ${req.context}` }, { inlineData: { data: req.imageBase64, mimeType: req.mimeType } }],
+        parts: [
+          { text: `Context: ${req.context}` },
+          { inlineData: { data: req.imageBase64, mimeType: req.mimeType } },
+        ],
       },
     ],
   };

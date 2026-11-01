@@ -21,8 +21,10 @@ export const IconButton: React.FC<IconButtonProps> = ({
   };
 
   const variantClasses = {
-    ghost: 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)] active:bg-[var(--color-border)]',
-    surface: 'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] shadow-sm hover:bg-[var(--color-surface-2)]',
+    ghost:
+      'text-[var(--color-text)] hover:bg-[var(--color-surface-2)] active:bg-[var(--color-border)]',
+    surface:
+      'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] shadow-sm hover:bg-[var(--color-surface-2)]',
     primary: 'bg-[var(--color-primary)] text-white hover:opacity-90 shadow-sm',
   };
 

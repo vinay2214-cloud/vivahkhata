@@ -86,10 +86,7 @@ export async function revokeInvite(code: string): Promise<void> {
   }
 }
 
-export async function joinWeddingWithInvite(
-  invite: Invite,
-  user: UserProfile
-): Promise<void> {
+export async function joinWeddingWithInvite(invite: Invite, user: UserProfile): Promise<void> {
   const wid = invite.weddingId;
   const memberPath = `weddings/${wid}/members/${user.uid}`;
 

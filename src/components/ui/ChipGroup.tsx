@@ -9,9 +9,8 @@ export interface ChipOption {
 
 export interface ChipGroupProps {
   options: ChipOption[];
-  selectedId: string | string[];
-  onChange: (id: any) => void;
-  isMulti?: boolean;
+  selectedId: string;
+  onChange: (id: string) => void;
   className?: string;
 }
 
@@ -19,27 +18,10 @@ export const ChipGroup: React.FC<ChipGroupProps> = ({
   options,
   selectedId,
   onChange,
-  isMulti = false,
   className = '',
 }) => {
-  const isSelected = (id: string) => {
-    if (isMulti && Array.isArray(selectedId)) {
-      return selectedId.includes(id);
-    }
-    return selectedId === id;
-  };
-
-  const handleClick = (id: string) => {
-    if (isMulti && Array.isArray(selectedId)) {
-      if (selectedId.includes(id)) {
-        onChange(selectedId.filter((item) => item !== id));
-      } else {
-        onChange([...selectedId, id]);
-      }
-    } else {
-      onChange(id);
-    }
-  };
+  const isSelected = (id: string) => selectedId === id;
+  const handleClick = (id: string) => onChange(id);
 
   return (
     <div className={`flex items-center gap-2 overflow-x-auto no-scrollbar py-1 ${className}`}>

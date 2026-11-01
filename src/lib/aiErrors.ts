@@ -5,7 +5,8 @@ export function aiErrorMessage(err: unknown): string {
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
     return 'No internet. Reading needs a connection — please type the entry instead.';
   }
-  if (code === 'ai_not_configured') return 'AI reading is not switched on for this app yet. Please type the entry for now.';
+  if (code === 'ai_not_configured')
+    return 'AI reading is not switched on for this app yet. Please type the entry for now.';
   if (code === 'rate_limited' || /quota|429|RESOURCE_EXHAUSTED/i.test(msg)) {
     return 'Too many requests right now. Please wait a minute or type the entry.';
   }
