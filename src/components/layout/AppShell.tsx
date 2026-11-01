@@ -22,7 +22,7 @@ import { SyncPill } from '../ui/SyncPill';
 import { useSyncStatus } from '../../hooks/useSyncStatus';
 import { Avatar } from '../ui/Avatar';
 import { BottomSheet } from '../ui/BottomSheet';
-import { switchLanguage } from '../../i18n';
+import { switchLanguage, nextLanguage, asAppLanguage, LANGUAGE_LABEL } from '../../i18n';
 
 interface AppShellProps {
   currentTab: 'home' | 'money' | 'gifts' | 'more' | 'gift-desk';
@@ -56,11 +56,10 @@ export const AppShell: React.FC<AppShellProps> = ({
   const [isWeddingMenuOpen, setIsWeddingMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
-  const currentLang = i18n.language === 'te' ? 'te' : 'en';
+  const currentLang = asAppLanguage(i18n.language);
 
   const toggleLanguage = () => {
-    const nextLang = currentLang === 'en' ? 'te' : 'en';
-    switchLanguage(nextLang);
+    switchLanguage(nextLanguage(currentLang));
   };
 
   const navItems = [
@@ -135,7 +134,7 @@ export const AppShell: React.FC<AppShellProps> = ({
                   {profile?.displayName || user?.displayName || 'User'}
                 </span>
                 <span className="text-[var(--color-text-muted)] capitalize">
-                  {profile?.language === 'te' ? 'తెలుగు' : 'English'}
+                  {LANGUAGE_LABEL[currentLang]}
                 </span>
               </div>
             </div>
@@ -145,7 +144,7 @@ export const AppShell: React.FC<AppShellProps> = ({
               onClick={toggleLanguage}
               className="text-xs font-semibold px-2.5 py-1 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-md hover:bg-[var(--color-border)]"
             >
-              {currentLang === 'en' ? 'తెలుగు' : 'EN'}
+              {LANGUAGE_LABEL[nextLanguage(currentLang)]}
             </button>
           </div>
         </div>
@@ -177,7 +176,7 @@ export const AppShell: React.FC<AppShellProps> = ({
               aria-label="Toggle language"
               className="px-2.5 py-1 text-xs font-bold rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] cursor-pointer"
             >
-              {currentLang === 'en' ? 'తెలుగు' : 'EN'}
+              {LANGUAGE_LABEL[nextLanguage(currentLang)]}
             </button>
 
             <button
@@ -218,7 +217,7 @@ export const AppShell: React.FC<AppShellProps> = ({
                 }}
                 className="w-full text-left px-3 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-surface-2)] rounded-lg font-medium cursor-pointer"
               >
-                Switch Language ({currentLang === 'en' ? 'తెలుగు' : 'English'})
+                Switch Language ({LANGUAGE_LABEL[nextLanguage(currentLang)]})
               </button>
 
               <button

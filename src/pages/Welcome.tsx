@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { IndianRupee, Gift, WifiOff, Sparkles, ArrowRight } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../context/AuthContext';
-import { switchLanguage } from '../i18n';
+import { switchLanguage, nextLanguage, asAppLanguage, LANGUAGE_LABEL } from '../i18n';
 
 interface WelcomeProps {
   onSuccess: () => void;
@@ -15,7 +15,7 @@ export const Welcome: React.FC<WelcomeProps> = ({ onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
 
-  const currentLang = i18n.language === 'te' ? 'te' : 'en';
+  const currentLang = asAppLanguage(i18n.language);
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
@@ -56,10 +56,10 @@ export const Welcome: React.FC<WelcomeProps> = ({ onSuccess }) => {
 
         <button
           type="button"
-          onClick={() => switchLanguage(currentLang === 'en' ? 'te' : 'en')}
+          onClick={() => switchLanguage(nextLanguage(currentLang))}
           className="text-xs font-bold px-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-2)] text-[var(--color-text)] transition-colors cursor-pointer"
         >
-          {currentLang === 'en' ? 'తెలుగులోకి మారండి' : 'Switch to English'}
+          {LANGUAGE_LABEL[nextLanguage(currentLang)]}
         </button>
       </div>
 

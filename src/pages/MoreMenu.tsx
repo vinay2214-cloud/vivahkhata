@@ -20,7 +20,7 @@ import { AmountText } from '../components/ui/AmountText';
 import { formatDate } from '../lib/dates';
 import { seedDemoWedding } from '../services/demoData';
 import { WeddingEvent } from '../types';
-import { switchLanguage } from '../i18n';
+import { switchLanguage, nextLanguage, asAppLanguage, LANGUAGE_LABEL } from '../i18n';
 
 interface MoreMenuProps {
   onOpenEventModal: (event?: WeddingEvent) => void;
@@ -36,7 +36,7 @@ export const MoreMenu: React.FC<MoreMenuProps> = ({
   const { user } = useAuth();
   const [seeding, setSeeding] = useState(false);
 
-  const currentLang = i18n.language === 'te' ? 'te' : 'en';
+  const currentLang = asAppLanguage(i18n.language);
 
   const handleSeedDemoData = async () => {
     if (!weddingId || !user) return;
@@ -132,7 +132,7 @@ export const MoreMenu: React.FC<MoreMenuProps> = ({
 
         {/* Language Switch */}
         <div
-          onClick={() => switchLanguage(currentLang === 'en' ? 'te' : 'en')}
+          onClick={() => switchLanguage(nextLanguage(currentLang))}
           className="p-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] shadow-xs transition-all cursor-pointer flex items-center gap-3.5"
         >
           <div className="w-12 h-12 rounded-xl bg-[var(--color-accent-soft)] text-[#8C5D00] flex items-center justify-center shrink-0">
@@ -143,7 +143,7 @@ export const MoreMenu: React.FC<MoreMenuProps> = ({
               Language (భాష)
             </h3>
             <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
-              Current: {currentLang === 'en' ? 'English (Switch to తెలుగు)' : 'తెలుగు (Switch to English)'}
+              Current: {LANGUAGE_LABEL[currentLang]} (tap to switch to {LANGUAGE_LABEL[nextLanguage(currentLang)]})
             </p>
           </div>
         </div>

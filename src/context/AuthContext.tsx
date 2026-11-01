@@ -86,14 +86,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         uid: cred.user.uid,
         displayName: 'Srinivasa Rao (Bride Father)',
         phone: '+91 98480 12345',
-        language: 'te',
+        language: 'en',
         photoURL: '',
         weddingIds: [],
         createdAt: serverTimestamp(),
       };
       await setDoc(userDocRef, demoProfile);
       setProfile(demoProfile);
-      switchLanguage('te');
+      switchLanguage('en');
     } catch (error) {
       console.error('Demo sign in error:', error);
       throw error;

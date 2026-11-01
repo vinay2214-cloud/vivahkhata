@@ -18,7 +18,7 @@ export interface UserProfile {
   uid: string;
   displayName: string;
   phone?: string;
-  language: 'en' | 'te';
+  language: 'en' | 'te' | 'hi';
   photoURL?: string;
   weddingIds: string[];
   lastWeddingId?: string;
