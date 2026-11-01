@@ -8,6 +8,7 @@ import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
 import { formatGoldMg } from '../lib/money';
 import { Gift } from '../types';
+import { ThankYouSheet } from '../components/gift/ThankYouSheet';
 import { repeatGivers } from '../domain/giverHistory';
 
 interface GiftRegisterProps {
@@ -22,6 +23,7 @@ export const GiftRegister: React.FC<GiftRegisterProps> = ({
   const { t } = useTranslation();
   const { wedding, gifts, totals, events } = useWedding();
   const [searchQuery, setSearchQuery] = useState('');
+  const [thankGift, setThankGift] = useState<Gift | null>(null);
   const [selectedSideFilter, setSelectedSideFilter] = useState<'all' | 'bride' | 'groom' | 'common'>('all');
 
   const filteredGifts = useMemo(() => {
@@ -236,16 +238,32 @@ export const GiftRegister: React.FC<GiftRegisterProps> = ({
                 </div>
               </div>
 
-              <div className="text-right shrink-0">
+              <div className="text-right shrink-0 flex flex-col items-end gap-1">
                 <AmountText
                   paise={gift.cashPaise}
                   className="font-bold text-base text-[var(--color-primary)]"
                 />
+                <button
+                  type="button"
+                  aria-label={`Write a thank-you to ${gift.giverName}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setThankGift(gift);
+                  }}
+                  className="text-xs font-bold text-[var(--color-primary)] px-2 min-h-8 rounded-lg border border-[var(--color-border)] cursor-pointer"
+                >
+                  Thank
+                </button>
               </div>
             </div>
           ))}
         </div>
       )}
+      <ThankYouSheet
+        gift={thankGift}
+        hostNames={[wedding?.brideName, wedding?.groomName].filter(Boolean).join(' & ')}
+        onClose={() => setThankGift(null)}
+      />
     </div>
   );
 };

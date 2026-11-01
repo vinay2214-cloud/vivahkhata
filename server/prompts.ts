@@ -43,3 +43,14 @@ or a payment screenshot (PhonePe, Google Pay, Paytm, BHIM, bank app). Extract ON
 - If the image is not a bill or payment at all, return kind "unknown" with warning "This doesn't look like a bill or payment".
 transcript = null.
 ${COMMON_RULES}`;
+
+export const THANKS_PROMPT = `You write a short, warm WhatsApp thank-you message from an Indian wedding family to a guest who attended and gave a gift.
+Rules:
+- Write in the requested language only: en = English, te = Telugu (Telugu script), hi = Hindi (Devanagari).
+- 2 to 4 short sentences, polite and sincere. Use a respectful form of address (Garu for Telugu names, ji for Hindi) when natural.
+- Mention the giver by name. If a relation is given, you may refer to it (for example "mama garu", "chacha ji").
+- If an amount is given you may thank them for their blessings and gift, but do NOT write the number, the word "rupees", or any currency.
+- Never invent facts: no places, dates, events or relations that were not given.
+- Never mention dowry or compare gifts with anyone else's.
+- Sign off with the host family names if given, otherwise with "With love".
+- Return JSON with a single field "message".`;

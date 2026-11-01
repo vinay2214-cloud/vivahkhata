@@ -1,6 +1,7 @@
 import imageCompression from 'browser-image-compression';
 import { auth } from './firebase';
 import type { ParsedAIDraft } from '../components/ai/ConfirmCard';
+import { cleanThanks, type ThanksLanguage } from './thanks';
 import { buildContext, toDraft, type AIContext, type RawResult } from './aiDraft';
 
 export type { AIContext } from './aiDraft';
@@ -15,9 +16,18 @@ export type { AIContext } from './aiDraft';
 
 type ReadRequest =
   | { kind: 'voice'; text: string; context: string }
+  | {
+      kind: 'thanks';
+      giverName: string;
+      relation: string;
+      town: string;
+      amountRupees: number | null;
+      hostNames: string;
+      language: ThanksLanguage;
+    }
   | { kind: 'bill'; imageBase64: string; mimeType: string; context: string };
 
-async function readOnServer(body: ReadRequest): Promise<RawResult> {
+async function readOnServer(body: ReadRequest): Promise<RawResult & { message?: unknown }> {
   const user = auth.currentUser;
   if (!user) throw new Error('Please sign in again.');
   const token = await user.getIdToken();
@@ -77,4 +87,27 @@ export async function readBillWithGemini(file: File, ctx: AIContext, thumbnailUr
     context: buildContext(ctx),
   });
   return toDraft(raw, ctx, thumbnailUrl);
+}
+
+export interface ThanksRequest {
+  giverName: string;
+  relation?: string;
+  town?: string;
+  cashPaise: number;
+  hostNames: string;
+  language: ThanksLanguage;
+}
+
+/** Asks Gemini for a short personal thank-you in the chosen language. Returns null if nothing usable came back. */
+export async function writeThankYouWithGemini(input: ThanksRequest): Promise<string | null> {
+  const raw = await readOnServer({
+    kind: 'thanks',
+    giverName: input.giverName.slice(0, 80),
+    relation: (input.relation || '').slice(0, 80),
+    town: (input.town || '').slice(0, 80),
+    amountRupees: input.cashPaise > 0 ? input.cashPaise / 100 : null,
+    hostNames: input.hostNames.slice(0, 80),
+    language: input.language,
+  });
+  return cleanThanks(raw.message);
 }

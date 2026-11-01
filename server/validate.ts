@@ -12,8 +12,21 @@ const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/;
 
 export type ImageType = (typeof ALLOWED_IMAGE_TYPES)[number];
 
+export const THANKS_LANGUAGES = ['en', 'te', 'hi'] as const;
+export type ThanksLanguage = (typeof THANKS_LANGUAGES)[number];
+export const MAX_NAME = 80;
+
 export type ReadRequest =
   | { kind: 'voice'; text: string; context: string }
+  | {
+      kind: 'thanks';
+      giverName: string;
+      relation: string;
+      town: string;
+      amountRupees: number | null;
+      hostNames: string;
+      language: ThanksLanguage;
+    }
   | { kind: 'bill'; imageBase64: string; mimeType: ImageType; context: string };
 
 export type ValidationResult = { ok: true; value: ReadRequest } | { ok: false; error: string };
@@ -21,6 +34,37 @@ export type ValidationResult = { ok: true; value: ReadRequest } | { ok: false; e
 export function validateReadRequest(body: unknown): ValidationResult {
   if (!body || typeof body !== 'object') return { ok: false, error: 'Bad request' };
   const { kind, text, imageBase64, mimeType, context } = body as Record<string, unknown>;
+
+  if (kind === 'thanks') {
+    const b = body as Record<string, unknown>;
+    const short = (v: unknown) => (typeof v === 'string' && v.length <= MAX_NAME ? v.trim() : null);
+    const giverName = short(b.giverName);
+    const relation = short(b.relation ?? '');
+    const town = short(b.town ?? '');
+    const hostNames = short(b.hostNames ?? '');
+    const amount = b.amountRupees;
+    if (!giverName || relation === null || town === null || hostNames === null) {
+      return { ok: false, error: 'Giver name is missing or too long' };
+    }
+    if (amount != null && (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0 || amount > 100_000_000)) {
+      return { ok: false, error: 'Amount is not valid' };
+    }
+    if (!(THANKS_LANGUAGES as readonly string[]).includes(b.language as string)) {
+      return { ok: false, error: 'Language not supported' };
+    }
+    return {
+      ok: true,
+      value: {
+        kind: 'thanks',
+        giverName,
+        relation,
+        town,
+        amountRupees: (amount as number | null | undefined) ?? null,
+        hostNames,
+        language: b.language as ThanksLanguage,
+      },
+    };
+  }
 
   if (typeof context !== 'string' || context.length > MAX_CONTEXT) {
     return { ok: false, error: 'Bad request' };
