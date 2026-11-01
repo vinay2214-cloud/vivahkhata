@@ -1,6 +1,6 @@
 # Vivah Khata — the family wedding ledger
 
-[![CI](https://github.com/vinay2214-cloud/vivahkhata/actions/workflows/ci.yml/badge.svg)](https://github.com/vinay2214-cloud/vivahkhata/actions) ![Tests](https://img.shields.io/badge/tests-75%20passing-brightgreen) ![Coverage](https://img.shields.io/badge/coverage-~84%25-brightgreen) ![License](https://img.shields.io/badge/license-MIT-blue)
+[![CI](https://github.com/vinay2214-cloud/vivahkhata/actions/workflows/ci.yml/badge.svg)](https://github.com/vinay2214-cloud/vivahkhata/actions) ![Tests](https://img.shields.io/badge/tests-81%20passing-brightgreen) ![Coverage](https://img.shields.io/badge/coverage-~84%25-brightgreen) ![License](https://img.shields.io/badge/license-MIT-blue)
 
 **Live app:** https://vivahkhata.onrender.com · **Stack:** React + TypeScript · Firebase · Node/Express · Google Gemini
 
@@ -24,13 +24,13 @@ Every claim below can be checked in the repository or by running the commands sh
 | **Code quality**                | Strict separation of UI, services, pure domain logic and server. Zero `any` in the codebase (`@typescript-eslint/no-explicit-any` is an error), no raw `console.*` (central `logger`), typed Firestore timestamps, typed Web Speech wrapper, shared `errorMessage()` helper, an `ErrorBoundary`, ESLint + Prettier + EditorConfig enforced in CI. | [Code quality](#code-quality), `eslint.config.js`, `.prettierrc.json`    |
 | **Security**                    | Server-held API key, Firebase ID-token verification, input validation, per-user rate limits, security headers, role-based Firestore rules, soft deletes, `npm audit` in CI.                                                                                                                                                                       | [Security](#security), `firestore.rules`, `server/`                      |
 | **Efficiency**                  | Integer-paise maths, on-device totals, compressed photos, lazy AI module, cached static assets, offline Firestore cache.                                                                                                                                                                                                                          | [Efficiency](#efficiency)                                                |
-| **Testing**                     | 75 tests in 12 files (~84% line coverage) covering money, totals, permissions, AI draft mapping, offline parser, settle-up, thank-yous, i18n parity and real HTTP routes; run on every push.                                                                                                                                                      | [Testing](#testing), `.github/workflows/ci.yml`                          |
+| **Testing**                     | 81 tests in 14 files (~84% line coverage) covering money, totals, permissions, AI draft mapping, offline parser, settle-up, thank-yous, i18n parity and real HTTP routes; run on every push.                                                                                                                                                      | [Testing](#testing), `.github/workflows/ci.yml`                          |
 | **Accessibility**               | axe-core scan of the sign-in screen (0 WCAG 2 A/AA violations, light and dark), labelled dialogs, Escape to close, focus return, live-region announcements, reduced-motion support, 48px targets.                                                                                                                                                 | [Accessibility](#accessibility)                                          |
 | **Use of Google services**      | Gemini (voice, bill reading, thank-yous) with a JSON `responseSchema`; Firebase Auth; Cloud Firestore with security rules and offline persistence.                                                                                                                                                                                                | [How Gen AI is used](#how-gen-ai-is-used), [Architecture](#architecture) |
 
 ## Code quality
 
-- **Layered structure.** `src/pages` and `src/components` render; `src/services` is the only code that writes to Firestore (audit fields and soft delete in one place); `src/domain` and `src/lib` hold pure, tested functions; `server/` is a small Express app built with dependency injection (`createApp(deps)`) so tests exercise real routes with a fake Gemini.
+- **Layered structure.** `src/pages` and `src/components` render (large screens are split into focused components, e.g. `src/pages/money/*`, `src/components/dashboard/*`); `src/services` is the only code that writes to Firestore (audit fields and soft delete in one place); `src/domain` and `src/lib` hold pure, tested functions; `server/` is a small Express app built with dependency injection (`createApp(deps)`) so tests exercise real routes with a fake Gemini.
 - **Strict typing.** No `any`. Caught errors are `unknown` and converted with `errorMessage()`; Firestore timestamps use a `FirestoreTime` type and `timeToDate()`; the browser speech API is wrapped in a small typed interface; timers use `ReturnType<typeof setInterval>`.
 - **One way to log.** Components never call `console.*`; they use `src/lib/logger.ts`. ESLint enforces it (`no-console`).
 - **Automated style.** `npm run lint` runs ESLint (typescript-eslint, react-hooks rules) and `tsc`; `npm run format:check` runs Prettier. Both run in CI.
@@ -120,7 +120,7 @@ flowchart LR
 ## Testing
 
 ```bash
-npm test               # 75 unit + API tests (Vitest)
+npm test               # 81 unit + API tests (Vitest)
 npm run test:coverage  # ~84% line coverage of business logic and server
 ```
 
@@ -135,6 +135,8 @@ npm run test:coverage  # ~84% line coverage of business logic and server
 | `tests/pendingInvite.test.ts` | Invite links survive sign-in; malformed codes rejected                                                       |
 | `tests/settle.test.ts`        | Settle-up transfers always sum to zero, repeat-giver totals, deleted gifts ignored                           |
 | `tests/thanks.test.ts`        | Thank-you template never contains an amount, WhatsApp link, server validation of the thank-you request       |
+| `tests/expenseFilter.test.ts` | Expense search/category filter and day grouping                                                              |
+| `tests/dues.test.ts`          | Pending vendor instalments: overdue first, paid ones excluded                                                |
 | `tests/errors.test.ts`        | Error-message helper, Firestore timestamp reader, logger                                                     |
 | `tests/i18n.test.ts`          | Telugu and Hindi cover every English key and keep `{{placeholders}}`                                         |
 | `tests/server.test.ts`        | Real HTTP routes: 401 without/forged token, 400 bad input, 429 rate limit, 503 without key, security headers |
