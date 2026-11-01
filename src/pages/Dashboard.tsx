@@ -1,22 +1,16 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  IndianRupee,
-  Gift,
-  Calendar,
-  Clock,
-  ArrowRight,
-  Sparkles,
-  CheckCircle2,
-} from 'lucide-react';
+import { IndianRupee, Gift, Calendar, Clock, ArrowRight, Sparkles } from 'lucide-react';
 import { useWedding } from '../context/WeddingContext';
 import { useAuth } from '../context/AuthContext';
 import { seedDemoWedding } from '../services/demoData';
 import { StatCard } from '../components/ui/StatCard';
-import { AmountText } from '../components/ui/AmountText';
-import { Badge } from '../components/ui/Badge';
 import { formatDate, formatCountdown } from '../lib/dates';
-import { computeVendorBalance } from '../domain/vendorBalance';
+import { pendingDues } from '../domain/dues';
+import { GettingStartedCard } from '../components/dashboard/GettingStartedCard';
+import { UpcomingDues } from '../components/dashboard/UpcomingDues';
+import { SpendBreakdown } from '../components/dashboard/SpendBreakdown';
+import { SettleUpCard } from '../components/dashboard/SettleUpCard';
 import { settleUp } from '../domain/settle';
 
 interface DashboardProps {
@@ -58,37 +52,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const countdown = formatCountdown(wedding?.weddingDate);
 
-  // Compute upcoming dues from vendors
-  const allDueItems: Array<{
-    vendorName: string;
-    label: string;
-    amountPaise: number;
-    dueDate: string;
-    status: 'paid' | 'due' | 'overdue';
-  }> = [];
-
-  vendors.forEach((v) => {
-    const summary = computeVendorBalance(v, expenses);
-    summary.scheduleWithStatus.forEach((item) => {
-      if (item.status !== 'paid') {
-        allDueItems.push({
-          vendorName: v.name,
-          label: item.label,
-          amountPaise: item.amountPaise,
-          dueDate: item.dueDate,
-          status: item.status,
-        });
-      }
-    });
-  });
-
-  // Sort: overdue first, then by earliest dueDate
-  allDueItems.sort((a, b) => {
-    if (a.status === 'overdue' && b.status !== 'overdue') return -1;
-    if (b.status === 'overdue' && a.status !== 'overdue') return 1;
-    return (a.dueDate || '').localeCompare(b.dueDate || '');
-  });
-
+  const allDueItems = pendingDues(vendors, expenses);
   const nextUpcomingDues = allDueItems.slice(0, 3);
 
   // Next Event
@@ -163,75 +127,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
         )}
       </div>
 
-      {/* Getting Started Checklist Card */}
       {showGettingStarted && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-[var(--color-primary-soft)]/50 border border-[var(--color-primary)]/20 shadow-xs">
-          <h2 className="text-sm font-bold text-[var(--color-primary)] uppercase tracking-wider mb-3">
-            {t('dashboard.get_started')}
-          </h2>
-
-          <div className="flex flex-col gap-2">
-            {/* Task 1: Invite */}
-            <div
-              onClick={onOpenInviteModal}
-              className={`p-3 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${
-                isInviteDone
-                  ? 'bg-white/80 border-neutral-200 line-through text-neutral-400'
-                  : 'bg-white border-[var(--color-primary)]/30 hover:border-[var(--color-primary)] shadow-xs'
-              }`}
-            >
-              <div className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold">
-                <CheckCircle2
-                  className={`w-4 h-4 ${
-                    isInviteDone ? 'text-[var(--color-success)]' : 'text-neutral-300'
-                  }`}
-                />
-                <span>{t('dashboard.task_invite')}</span>
-              </div>
-              <ArrowRight className="w-4 h-4 text-[var(--color-primary)]" />
-            </div>
-
-            {/* Task 2: First expense */}
-            <div
-              onClick={onOpenExpenseSheet}
-              className={`p-3 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${
-                isExpenseDone
-                  ? 'bg-white/80 border-neutral-200 line-through text-neutral-400'
-                  : 'bg-white border-[var(--color-primary)]/30 hover:border-[var(--color-primary)] shadow-xs'
-              }`}
-            >
-              <div className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold">
-                <CheckCircle2
-                  className={`w-4 h-4 ${
-                    isExpenseDone ? 'text-[var(--color-success)]' : 'text-neutral-300'
-                  }`}
-                />
-                <span>{t('dashboard.task_expense')}</span>
-              </div>
-              <ArrowRight className="w-4 h-4 text-[var(--color-primary)]" />
-            </div>
-
-            {/* Task 3: Vendor */}
-            <div
-              onClick={onOpenVendorModal}
-              className={`p-3 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${
-                isVendorDone
-                  ? 'bg-white/80 border-neutral-200 line-through text-neutral-400'
-                  : 'bg-white border-[var(--color-primary)]/30 hover:border-[var(--color-primary)] shadow-xs'
-              }`}
-            >
-              <div className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold">
-                <CheckCircle2
-                  className={`w-4 h-4 ${
-                    isVendorDone ? 'text-[var(--color-success)]' : 'text-neutral-300'
-                  }`}
-                />
-                <span>{t('dashboard.task_vendor')}</span>
-              </div>
-              <ArrowRight className="w-4 h-4 text-[var(--color-primary)]" />
-            </div>
-          </div>
-        </div>
+        <GettingStartedCard
+          isInviteDone={isInviteDone}
+          isExpenseDone={isExpenseDone}
+          isVendorDone={isVendorDone}
+          onOpenInviteModal={onOpenInviteModal}
+          onOpenExpenseSheet={onOpenExpenseSheet}
+          onOpenVendorModal={onOpenVendorModal}
+        />
       )}
 
       {/* 2x2 Stat Cards Grid */}
@@ -308,58 +212,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <ArrowRight className="w-5 h-5 shrink-0" />
       </div>
 
-      {/* Upcoming Vendor Dues */}
-      <div className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[var(--color-warning)]" />
-            <h2 className="font-bold text-sm text-[var(--color-text)] uppercase tracking-wider">
-              {t('dashboard.upcoming_dues')}
-            </h2>
-          </div>
-          <button
-            type="button"
-            onClick={() => onNavigateTab('money')}
-            className="text-xs font-bold text-[var(--color-primary)] hover:underline cursor-pointer"
-          >
-            {t('dashboard.see_all')}
-          </button>
-        </div>
-
-        {nextUpcomingDues.length === 0 ? (
-          <p className="text-xs text-[var(--color-text-muted)] py-2">{t('dashboard.no_dues')}</p>
-        ) : (
-          <div className="flex flex-col gap-2.5">
-            {nextUpcomingDues.map((item, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between p-3 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)]"
-              >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-[var(--color-text)]">
-                      {item.vendorName}
-                    </span>
-                    {item.status === 'overdue' && (
-                      <Badge variant="danger" size="sm">
-                        Overdue
-                      </Badge>
-                    )}
-                  </div>
-                  <span className="text-xs text-[var(--color-text-muted)] mt-0.5 block">
-                    {item.label} {item.dueDate && `• Due: ${formatDate(item.dueDate)}`}
-                  </span>
-                </div>
-
-                <AmountText
-                  paise={item.amountPaise}
-                  className="font-bold text-base text-[var(--color-text)]"
-                />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <UpcomingDues dues={nextUpcomingDues} onNavigateTab={onNavigateTab} />
 
       {/* Next Event Card */}
       {nextEvent && (
@@ -390,122 +243,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       )}
 
-      {/* Spend Breakdowns */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Spend by Category */}
-        <div className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs">
-          <h2 className="font-bold text-sm text-[var(--color-text)] uppercase tracking-wider mb-4">
-            {t('dashboard.spend_by_category')}
-          </h2>
+      <SpendBreakdown
+        categoriesWithSpend={categoriesWithSpend}
+        payers={payers}
+        totalSpentPaise={totals.totalSpentPaise}
+      />
 
-          {categoriesWithSpend.length === 0 ? (
-            <p className="text-xs text-[var(--color-text-muted)] py-4 text-center">
-              No categorized expenses yet.
-            </p>
-          ) : (
-            <div className="flex flex-col gap-3">
-              {categoriesWithSpend.map((cat) => {
-                const ratio =
-                  totals.totalSpentPaise > 0 ? (cat.spentPaise / totals.totalSpentPaise) * 100 : 0;
-                return (
-                  <div key={cat.id} className="flex flex-col gap-1">
-                    <div className="flex justify-between text-xs font-semibold">
-                      <span className="text-[var(--color-text)]">{cat.label}</span>
-                      <AmountText paise={cat.spentPaise} />
-                    </div>
-                    <div className="w-full h-1.5 bg-[var(--color-surface-2)] rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-[var(--color-primary)] rounded-full"
-                        style={{ width: `${ratio}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Spend by Payer */}
-        <div className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs">
-          <h2 className="font-bold text-sm text-[var(--color-text)] uppercase tracking-wider mb-4">
-            {t('dashboard.spend_by_payer')}
-          </h2>
-
-          {payers.length === 0 ? (
-            <p className="text-xs text-[var(--color-text-muted)] py-4 text-center">
-              No payments recorded yet.
-            </p>
-          ) : (
-            <div className="flex flex-col gap-3">
-              {payers.map((payer, idx) => {
-                const ratio =
-                  totals.totalSpentPaise > 0 ? (payer.amount / totals.totalSpentPaise) * 100 : 0;
-                return (
-                  <div key={idx} className="flex flex-col gap-1">
-                    <div className="flex justify-between text-xs font-semibold">
-                      <span className="text-[var(--color-text)]">{payer.name}</span>
-                      <AmountText paise={payer.amount} />
-                    </div>
-                    <div className="w-full h-1.5 bg-[var(--color-surface-2)] rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-[var(--color-accent)] rounded-full"
-                        style={{ width: `${ratio}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Settle up — who owes whom if everyone who paid shares equally */}
-      {settle.balances.length > 1 && (
-        <section
-          className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs"
-          aria-labelledby="settle-title"
-        >
-          <h2
-            id="settle-title"
-            className="font-bold text-sm text-[var(--color-text)] uppercase tracking-wider"
-          >
-            Settle up
-          </h2>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1 mb-4">
-            If the {settle.balances.length} people who paid share equally, each share is{' '}
-            <AmountText paise={settle.sharePaise} className="font-bold" />.
-          </p>
-          {settle.transfers.length === 0 ? (
-            <p className="text-sm font-semibold text-[var(--color-success)]">
-              Everyone is even. Nothing to settle.
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {settle.transfers.map((tr) => (
-                <li
-                  key={`${tr.from}-${tr.to}`}
-                  className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[var(--color-surface-2)] text-sm"
-                >
-                  <span className="font-semibold text-[var(--color-text)] min-w-0 truncate">
-                    {tr.from}{' '}
-                    <ArrowRight
-                      className="inline w-3.5 h-3.5 mx-1 text-[var(--color-text-muted)]"
-                      aria-label="pays"
-                    />{' '}
-                    {tr.to}
-                  </span>
-                  <AmountText
-                    paise={tr.amountPaise}
-                    className="font-bold text-[var(--color-primary)] shrink-0"
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      )}
+      {settle.balances.length > 1 && <SettleUpCard settle={settle} />}
     </div>
   );
 };
