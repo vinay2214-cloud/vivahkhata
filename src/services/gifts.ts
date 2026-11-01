@@ -24,9 +24,8 @@ export interface CreateGiftInput {
   source?: 'manual' | 'voice' | 'giftDesk';
 }
 
-export function generateNameKey(name: string): string {
-  return name.trim().toLowerCase().replace(/\s+/g, ' ');
-}
+export { generateNameKey } from '../lib/names';
+import { generateNameKey } from '../lib/names';
 
 export async function createGift(
   wid: string,

@@ -42,7 +42,7 @@ export const Welcome: React.FC<WelcomeProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] flex flex-col justify-between p-4 sm:p-6 max-w-lg mx-auto">
+    <main className="min-h-screen bg-[var(--color-bg)] flex flex-col justify-between p-4 sm:p-6 max-w-lg mx-auto">
       {/* Top Language Toggle */}
       <div className="flex justify-between items-center py-2">
         <div className="flex items-center gap-2">
@@ -84,9 +84,9 @@ export const Welcome: React.FC<WelcomeProps> = ({ onSuccess }) => {
               <IndianRupee className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-[var(--color-text)]">
+              <h2 className="font-bold text-sm text-[var(--color-text)]">
                 {t('welcome.benefit1_title')}
-              </h3>
+              </h2>
               <p className="text-xs text-[var(--color-text-muted)] mt-0.5 leading-relaxed">
                 {t('welcome.benefit1_desc')}
               </p>
@@ -99,9 +99,9 @@ export const Welcome: React.FC<WelcomeProps> = ({ onSuccess }) => {
               <Gift className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-[var(--color-text)]">
+              <h2 className="font-bold text-sm text-[var(--color-text)]">
                 {t('welcome.benefit2_title')}
-              </h3>
+              </h2>
               <p className="text-xs text-[var(--color-text-muted)] mt-0.5 leading-relaxed">
                 {t('welcome.benefit2_desc')}
               </p>
@@ -114,9 +114,9 @@ export const Welcome: React.FC<WelcomeProps> = ({ onSuccess }) => {
               <WifiOff className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-[var(--color-text)]">
+              <h2 className="font-bold text-sm text-[var(--color-text)]">
                 {t('welcome.benefit3_title')}
-              </h3>
+              </h2>
               <p className="text-xs text-[var(--color-text-muted)] mt-0.5 leading-relaxed">
                 {t('welcome.benefit3_desc')}
               </p>
@@ -152,6 +152,6 @@ export const Welcome: React.FC<WelcomeProps> = ({ onSuccess }) => {
           {t('welcome.privacy_note')}
         </p>
       </div>
-    </div>
+    </main>
   );
 };

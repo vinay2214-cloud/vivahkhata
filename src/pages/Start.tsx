@@ -68,7 +68,7 @@ export const Start: React.FC<StartProps> = ({ onCreateNew, onJoinSuccess, initia
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] flex flex-col justify-center p-4 sm:p-6 max-w-lg mx-auto">
+    <main className="min-h-screen bg-[var(--color-bg)] flex flex-col justify-center p-4 sm:p-6 max-w-lg mx-auto">
       {/* Header */}
       <div className="text-center mb-8">
         <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center mx-auto mb-3 shadow-xs">
@@ -175,6 +175,6 @@ export const Start: React.FC<StartProps> = ({ onCreateNew, onJoinSuccess, initia
           </button>
         )}
       </div>
-    </div>
+    </main>
   );
 };

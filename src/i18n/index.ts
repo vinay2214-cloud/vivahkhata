@@ -17,6 +17,8 @@ i18n.use(initReactI18next).init({
   },
 });
 
+if (typeof document !== 'undefined') document.documentElement.lang = savedLang;
+
 export function switchLanguage(lang: 'en' | 'te') {
   i18n.changeLanguage(lang);
   localStorage.setItem('vk_language', lang);

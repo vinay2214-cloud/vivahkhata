@@ -180,6 +180,8 @@ export const VoiceRecorderSheet: React.FC<VoiceRecorderSheetProps> = ({
             <div className="absolute inset-0 rounded-full bg-[var(--color-primary)] opacity-30 animate-ping" />
           )}
           <button
+            aria-label={isRecording ? 'Stop recording' : 'Start recording'}
+            aria-pressed={isRecording}
             type="button"
             onClick={isRecording ? stopRecording : startRecording}
             className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-lg active:scale-95 ${
