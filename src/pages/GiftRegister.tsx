@@ -8,6 +8,7 @@ import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/EmptyState';
 import { formatGoldMg } from '../lib/money';
 import { Gift } from '../types';
+import { repeatGivers } from '../domain/giverHistory';
 
 interface GiftRegisterProps {
   onOpenGiftDesk: () => void;
@@ -39,6 +40,8 @@ export const GiftRegister: React.FC<GiftRegisterProps> = ({
       return true;
     });
   }, [gifts, searchQuery, selectedSideFilter]);
+
+  const repeats = useMemo(() => repeatGivers(gifts), [gifts]);
 
   // CSV Export with UTF-8 BOM so Telugu characters display properly in Excel & Google Sheets
   const handleExportCSV = () => {
@@ -137,6 +140,24 @@ export const GiftRegister: React.FC<GiftRegisterProps> = ({
           <ArrowRight className="w-4 h-4 ml-1" />
         </button>
       </div>
+
+      {repeats.length > 0 && (
+        <section className="p-4 rounded-2xl bg-[var(--color-accent-soft)] border border-[#F2B84B]/40" aria-labelledby="repeat-title">
+          <h2 id="repeat-title" className="text-xs font-bold uppercase tracking-wider text-[#8C5D00]">
+            Gave more than once
+          </h2>
+          <ul className="mt-2 flex flex-col gap-1.5">
+            {repeats.slice(0, 5).map((r) => (
+              <li key={r.nameKey} className="flex items-center justify-between gap-3 text-sm">
+                <span className="font-semibold text-[var(--color-text)] truncate">
+                  {r.giverName} <span className="text-xs font-normal text-[var(--color-text-muted)]">· {r.count} gifts</span>
+                </span>
+                <AmountText paise={r.totalCashPaise} className="font-bold text-[var(--color-primary)] shrink-0" />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Search & Filters */}
       <div className="flex flex-col gap-2.5">

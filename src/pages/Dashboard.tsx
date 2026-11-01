@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   IndianRupee,
@@ -14,12 +14,15 @@ import {
   Store,
 } from 'lucide-react';
 import { useWedding } from '../context/WeddingContext';
+import { useAuth } from '../context/AuthContext';
+import { seedDemoWedding } from '../services/demoData';
 import { StatCard } from '../components/ui/StatCard';
 import { AmountText } from '../components/ui/AmountText';
 import { Badge } from '../components/ui/Badge';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { formatDate, formatCountdown } from '../lib/dates';
 import { computeVendorBalance } from '../domain/vendorBalance';
+import { settleUp } from '../domain/settle';
 
 interface DashboardProps {
   onNavigateTab: (tab: 'home' | 'money' | 'gifts' | 'more' | 'gift-desk') => void;
@@ -37,7 +40,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenInviteModal,
 }) => {
   const { t } = useTranslation();
-  const { wedding, totals, expenses, vendors, gifts, events, members } = useWedding();
+  const { weddingId, wedding, totals, expenses, vendors, gifts, events, members, showToast } = useWedding();
+  const { user } = useAuth();
+  const [loadingSample, setLoadingSample] = useState(false);
+  const showSampleBanner = Boolean(user?.isAnonymous) && expenses.length === 0 && gifts.length === 0 && vendors.length === 0;
+
+  const loadSample = async () => {
+    if (!weddingId || !user) return;
+    setLoadingSample(true);
+    try {
+      await seedDemoWedding(weddingId, user.uid);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Could not load the sample wedding');
+    } finally {
+      setLoadingSample(false);
+    }
+  };
 
   const countdown = formatCountdown(wedding?.weddingDate);
 
@@ -93,6 +111,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
     .sort((a, b) => b.spentPaise - a.spentPaise)
     .slice(0, 6);
 
+  const settle = settleUp(totals.spentByPayerPaise);
+
   // Top payers
   const payers = Object.entries(totals.spentByPayerPaise)
     .map(([name, amount]) => ({ name, amount }))
@@ -100,6 +120,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
+      {showSampleBanner && (
+        <div className="p-4 rounded-2xl border border-[var(--color-primary)] bg-[var(--color-primary-soft)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <p className="font-bold text-sm text-[var(--color-primary)]">Exploring in Demo Mode</p>
+            <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+              Fill this wedding with a realistic sample — vendors, dues, expenses and gift envelopes — in one tap.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={loadSample}
+            disabled={loadingSample}
+            className="px-4 py-2.5 rounded-xl bg-[var(--color-primary)] text-white font-bold text-sm min-h-12 cursor-pointer disabled:opacity-60"
+          >
+            {loadingSample ? 'Loading sample…' : 'Load sample wedding'}
+          </button>
+        </div>
+      )}
       {/* Wedding Header & Countdown */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--color-surface)] p-5 rounded-2xl border border-[var(--color-border)] shadow-xs">
         <div>
@@ -426,6 +464,33 @@ export const Dashboard: React.FC<DashboardProps> = ({
           )}
         </div>
       </div>
+
+      {/* Settle up — who owes whom if everyone who paid shares equally */}
+      {settle.balances.length > 1 && (
+        <section className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs" aria-labelledby="settle-title">
+          <h2 id="settle-title" className="font-bold text-sm text-[var(--color-text)] uppercase tracking-wider">
+            Settle up
+          </h2>
+          <p className="text-xs text-[var(--color-text-muted)] mt-1 mb-4">
+            If the {settle.balances.length} people who paid share equally, each share is{' '}
+            <AmountText paise={settle.sharePaise} className="font-bold" />.
+          </p>
+          {settle.transfers.length === 0 ? (
+            <p className="text-sm font-semibold text-[var(--color-success)]">Everyone is even. Nothing to settle.</p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {settle.transfers.map((tr) => (
+                <li key={`${tr.from}-${tr.to}`} className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[var(--color-surface-2)] text-sm">
+                  <span className="font-semibold text-[var(--color-text)] min-w-0 truncate">
+                    {tr.from} <ArrowRight className="inline w-3.5 h-3.5 mx-1 text-[var(--color-text-muted)]" aria-label="pays" /> {tr.to}
+                  </span>
+                  <AmountText paise={tr.amountPaise} className="font-bold text-[var(--color-primary)] shrink-0" />
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
     </div>
   );
 };
